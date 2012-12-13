@@ -1,12 +1,16 @@
 
-lucene-index-query/.classpath
+*/.classpath
 
-lucene-index-query/.project
+*/.project
 
 *.prefs
 
-lucene-index-query/dependency-reduced-pom.xml
+*/dependency-reduced-pom.xml
 
-lucene-index-query/target/
+*/target/
 
 *.DS_Store
+
+data/infochimps_dataset_47*
+
+
