@@ -8,15 +8,30 @@ Markdown (.md) is a human readable text format often used in version control sof
 Introduction
 -------
 
+Welcome to the Real Time Search and Analytics on Big Data tutorial. In this tutorial you will learn about Lucene, Solr, and how these search technologies can be used on big data in real time. Specifically we will cover:
+
+* Lucene Indexing and Querying
+* Running Solr Locally
+* Using the Solr Administrative UI
+* Creating a Solr Schema
+* Indexing Documents in Solr
+* Querying the Solr Index
+* Demo - Real Time Indexing
+* Demo - Big Data Indexing
+* Running Solr Cloud
+
 Tips
 -------
+
+* If you lose track or fall behind with the tutorial, read the READMEs! You should be able to complete the exercises with the instructions provided.
+* If the classroom is large, it will be tough for the instructor to provide any kind of 1 on 1 help. Please wait for a break to ask questions, or quietly ask a neighbor.
 
 Prerequisites
 -------
 
 ### Setup
 
-In addition, I would recommend the user has the following
+I would recommend the user has the following
 
 * Eclipse IDE for J2EE (not required, but helpful to browse code and write JUnit tests). I use Eclipse Juno but older versions should work.
 * Maven2Eclipse Plugin for Eclipse (not required, but much easier to import Maven projects into Eclipse)
@@ -63,3 +78,4 @@ For example:
 
 Sample Data
 -------
+Sample data is provided in the /data directory.
