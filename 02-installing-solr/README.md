@@ -13,7 +13,7 @@ Tips
 -------
 * If you are running Windows, I would suggest you set up an Ubuntu 12.04 LTS (http://www.ubuntu.com/download/desktop) virtual machine with VirtualBox (https://www.virtualbox.org/wiki/Downloads).
 
-Overview
+Installation
 -------
 
 ### Download and Unpack the Solr tarball
