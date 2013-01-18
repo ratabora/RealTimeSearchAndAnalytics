@@ -16,7 +16,7 @@ public class Solution {
   private final String[] schema = {"key", "first_name", "last_name",
       "birth_date", "age", "interests"};
   private final String[][] sampleRecords = {
-      {"1", "Ryan", "Tabora", "02/01/2012", "25",
+      {"1", "Ryan", "Tabora", "02/01/1920", "25",
           "zombies, comic books, dogs, video games, beer"},
       {"2", "Rick", "Grimes", "07/12/1983", "30",
           "my family, police work, rifles, government leaders"},

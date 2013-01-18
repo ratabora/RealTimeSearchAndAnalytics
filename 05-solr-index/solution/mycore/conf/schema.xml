@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="mycore" version="1.5">
+ <types>
+  <fieldType name="string" class="solr.StrField"/>
+  <fieldType name="integer" class="solr.SortableIntField"/>
+  <fieldType name="float" class="solr.SortableFloatField"/>  
+  <fieldType name="long" class="solr.LongField"/>
+  <fieldType name="date" class="solr.DateField"/>
+  <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100">
+    <analyzer type="index">
+      <tokenizer class="solr.StandardTokenizerFactory"/>
+      <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
+    <analyzer type="query">
+      <tokenizer class="solr.StandardTokenizerFactory"/>
+      <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+      <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
+  </fieldType>
+</types>
+<fields>
+  <field name="key"  type="string" indexed="true"  stored="true"/>
+  <field name="first_name"  type="string" indexed="true"  stored="true"/>
+  <field name="last_name"  type="string" indexed="true"  stored="true"/>
+  <field name="birth_date"  type="date" indexed="true"  stored="true"/>
+  <field name="age"  type="integer" indexed="true"  stored="true"/>
+  <field name="interests"  type="text_general" indexed="true"  stored="true" multiValued="true"/>
+  <field name="_version_" type="long" indexed="true" stored="true"/>
+
+</fields>
+
+<defaultSearchField>key</defaultSearchField>
+<uniqueKey>key</uniqueKey>
+
+</schema>

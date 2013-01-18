@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="stocks" version="1.5">
+ <types>
+  <fieldType name="string" class="solr.StrField"/>
+  <fieldType name="long" class="solr.LongField"/>
+  <fieldType name="float" class="solr.SortableFloatField"/>  
+  <fieldType name="date" class="solr.DateField"/>
+  <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100">
+    <analyzer type="index">
+      <tokenizer class="solr.StandardTokenizerFactory"/>
+      <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
+    <analyzer type="query">
+      <tokenizer class="solr.StandardTokenizerFactory"/>
+      <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+      <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
+  </fieldType>
+</types>
+<fields>
+
+  <field name="rowkey"  type="string" indexed="true"  stored="true"/>
+  <field name="exchange"  type="string" indexed="true"  stored="true"/>
+  <field name="stock_symbol"  type="string" indexed="true"  stored="true"/>
+  <field name="date"  type="date" indexed="true"  stored="true"/>
+  <field name="stock_price_open"  type="float" indexed="true"  stored="true"/>
+  <field name="stock_price_high"  type="float" indexed="true"  stored="true"/>
+  <field name="stock_price_low"  type="float" indexed="true"  stored="true"/>
+  <field name="stock_price_close"  type="float" indexed="true"  stored="true"/>
+  <field name="stock_volume"  type="float" indexed="true"  stored="true"/>
+  <field name="stock_price_adj_close"  type="float" indexed="true"  stored="true"/>
+  <field name="dividends"  type="float" indexed="true"  stored="true"/>
+  <field name="_version_" type="long" indexed="true" stored="true"/>
+  
+  <field name="all" type="text_general" indexed="true" stored="false" multiValued="true"/>
+  
+  <copyField source="rowkey" dest="all" />
+  <copyField source="exchange" dest="all" />
+  <copyField source="stock_symbol" dest="all" />
+  <copyField source="date" dest="all" />
+  <copyField source="stock_price_open" dest="all" />
+  <copyField source="stock_price_high" dest="all" />
+  <copyField source="stock_price_low" dest="all" />
+  <copyField source="stock_price_close" dest="all" />
+  <copyField source="stock_volume" dest="all" />
+  <copyField source="stock_price_adj_close" dest="all" />
+  <copyField source="dividends" dest="all" />
+
+</fields>
+
+<defaultSearchField>all</defaultSearchField>
+<uniqueKey>rowkey</uniqueKey>
+
+</schema>
