@@ -1,13 +1,17 @@
 
-*/.classpath
+*.classpath
 
-*/.project
+*.project
 
 *.prefs
 
-*/dependency-reduced-pom.xml
+*.settings
 
-*/target/
+*dependency-reduced-pom.xml
+
+*/target
+
+*/*/target
 
 *.DS_Store
 
@@ -15,8 +19,8 @@ data/infochimps_dataset_47*
 
 pictures.graffle
 
-pictures.graffle
-
 talkbackup
 
 */apache-solr-4.0.0
+
+
