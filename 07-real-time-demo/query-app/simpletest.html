@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Real Time Stock Data</title>
+	<script type="text/javascript" src="./js/jquery/jquery.js"></script>
+	<script language="javascript" type="text/javascript" src="./js/flot/jquery.flot.js"></script>
+	<script type="text/javascript">
+
+	$(document).ready(function () {	
+		$('#button').click(function() {
+			var array = new Array();
+			$.get('http://localhost:8983/solr/stocks/select?q=(stock_symbol:*)&sort=date%20desc&rows=20&wt=json&indent=true', function(data) {
+				$.each(data['response'],function(){
+					var counter = 0;
+					$.each(this, function(k,v){
+						//Iterate through each document where key is document number and value is the JSON object for each document
+						//var kvpair = [v['date'], v['stock_price_high']];
+						var dayandtime = v['date'].split("T");
+						var day = dayandtime[0].split("-");
+						var time = dayandtime[1].split("Z")[0].split(":");
+						var date = new Date(day[0],day[1],day[2],time[0],time[1],time[2]);
+						console.log(date);
+						var kvpair = [date, v['stock_price_high']];
+						array.push(kvpair);
+						counter++;
+						$.each(v, function(field,value){
+							//Iterates through the document's(v) field value pairs
+						});
+					});
+				});
+				$.plot($('#mygraph'),[array]);
+				console.log([array]);
+	    	});
+		});
+		$(function () {
+    		var d2 = [[0, 3], [4, 8], [8, 5], [9, 13]];
+    		console.log([d2]);
+    		$.plot($("#examplegraph"), [d2]);
+			});
+		});
+</script>
+</head>
+<body>
+	<h1>Real Time Stock Data</h1>
+	<button id="button">Click Here</button>
+	<div id="result">This is the result</div>
+	<div id="examplegraph" style="width:600px;height:300px;"></div>
+	<div id="mygraph" style="width:600px;height:300px;"></div>
+
+</body>
+</html>
