@@ -25,6 +25,7 @@ Tips
 
 * If you lose track or fall behind with the tutorial, read the READMEs! You should be able to complete the exercises with the instructions provided.
 * If the classroom is large, it will be tough for the instructor to provide any kind of 1 on 1 help. Please wait for a break to ask questions, or quietly ask a neighbor.
+* If you are running Windows, I would suggest you set up an Ubuntu 12.04 LTS (http://www.ubuntu.com/download/desktop) virtual machine with VirtualBox (https://www.virtualbox.org/wiki/Downloads).
 
 Prerequisites
 -------
@@ -33,6 +34,7 @@ Prerequisites
 
 I would recommend the user has the following
 
+* Linux based or Mac OS X Operating System. Windows users can use Cygwin
 * Eclipse IDE for J2EE (not required, but helpful to browse code and write JUnit tests). I use Eclipse Juno but older versions should work.
 * Maven2Eclipse Plugin for Eclipse (not required, but much easier to import Maven projects into Eclipse)
 * Maven version 3 or higher (required to build shaded executable jars)
