@@ -23,4 +23,9 @@ talkbackup
 
 */apache-solr-4.0.0
 
+06-sql-to-solr/src
+06-sql-to-solr/pom.xml
+
+
+
 
