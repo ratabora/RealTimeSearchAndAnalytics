@@ -3,7 +3,7 @@ Real Time Search and Analytics on Big Data - Solr Indexing via SolrJ
 
 Introduction
 -------
-This exercise will guide you through indexing documents via the native Java API.
+This exercise will guide you through indexing documents via the native Java API. This exercise is intended to be run on the student's local environment.
 
 Prerequisites
 -------

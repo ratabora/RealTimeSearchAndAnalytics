@@ -3,18 +3,18 @@ Real Time Search and Analytics on Big Data - Lucene Basics
 
 Introduction
 -------
-This demo will familiarize you with some of the basic Lucene functions, indexing and querying. Code is provided that indexes a string and then performs a query on it.
+This demo will familiarize you with some of the basic Lucene functions: indexing and querying. Code is provided that indexes a string and then performs a query on it. This exercise is intended to be run on the student's local environment.
 
 Prerequisites
 -------
-* The project should be imported in your IDE.
+* The project should be imported in your IDE (instructions provided in the project's top level README).
 
 Tips
 -------
 * General Tip: The project home ($PROJECT\_HOME) is defined as the top level directory in the github project. The $PROJECT\_HOME contains the slide deck, the sample data, and all of the exercises/demos.
 * General Tip: The module home is defined as the top level directory for a given exercise/demo. For example, $PROJECT_HOME/01-lucene-basics, is the $MODULE\_HOME for this module. 
 * Maven Tip: Always run maven commands from the $MODULE\_HOME/ folder. Maven must be run in a directory that contains the pom.xml file which contains the project build instructions.
-* Eclipse Tip: In order to import required packages, you can use the shortcut CMD + SHIFT + O. It makes organizing your imports much much easier.
+* Eclipse Tip: In order to import required packages, you can use the shortcut CMD + SHIFT + O. It makes organizing and finding your imports much much easier.
 * Eclipse Tip: In order to format tabs and spaces in your code, you can use the shortcut CMD + SHIFT + F. I use this very often to make my code more easily readable.
 
 Overview
@@ -26,7 +26,7 @@ First navigate to the project in Eclipse so we can understand what is included i
 
 #### LuceneIndexWriterAndQuery
 
-This is the only class in this project, and it contains the code to index and query data through Lucene.
+This is the only class in this project, and it contains the code to index and query data through Lucene. Read through the comments in the code to further understand what it is doing.
 
 Run the Exercise
 -------

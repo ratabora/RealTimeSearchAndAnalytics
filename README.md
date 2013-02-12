@@ -3,7 +3,7 @@ Real Time Search and Analytics on Big Data
 
 About the READMEs
 -------
-Markdown (.md) is a human readable text format often used in version control software like GitHub. MarkDown easily converts to HTML so users can choose which format their prefer. Several text editors like Sublime Text 2 and TextMate have markdown bundles in which users can use to view a color formatted version of the files. If you do not have one of these text editors you can always use your OS default text editor to open the MarkDown files or use a browser to view the HTML files.
+Markdown (.md) is a human readable text format often used in version control software like GitHub. MarkDown easily converts to HTML and PDF so users can choose which format their prefer. Several text editors like Sublime Text 2 and TextMate have markdown bundles in which users can use to view a color formatted version of the files. If you do not have one of these text editors you can always use your OS default text editor to open the MarkDown files, use a browser to view the HTML files, or a PDF viewer to view the PDF files.
 
 Introduction
 -------
@@ -34,13 +34,15 @@ Prerequisites
 
 I would recommend the user has the following
 
-* Linux based or Mac OS X Operating System. Windows users can use Cygwin
+* Internet connectivity will be required to build the Maven projects as Maven will automatically download any dependencies specified in the POM file. 
+* Linux based or Mac OS X Operating System. Windows users can use Cygwin.
 * Eclipse IDE for J2EE (not required, but helpful to browse code and write JUnit tests). I use Eclipse Juno but older versions should work.
-* Maven2Eclipse Plugin for Eclipse (not required, but much easier to import Maven projects into Eclipse)
+* Maven2Eclipse Plugin for Eclipse (not required, but aids in importing/building Maven projects)
 * Maven version 3 or higher (required to build shaded executable jars)
 
 ### Environment
 
+There are two kinds of exercises
 Internet connectivity will be required to build the Maven projects as Maven will automatically download any dependencies specified in the POM file. 
 
 ### Knowledge

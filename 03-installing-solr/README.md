@@ -3,7 +3,7 @@ Real Time Search and Analytics on Big Data - Installing Solr
 
 Introduction
 -------
-This exercise will guide you through creating a Solr index on your local machine.
+This exercise will guide you through installing Solr and some basic indexing and querying commands. This exercise is intended to be run on the student's local environment.
 
 Prerequisites
 -------
@@ -18,7 +18,7 @@ Installation
 
 ### Download and Unpack the Solr tarball
 
-You can download Solr 4.0 from the Apache website: http://lucene.apache.org/solr/downloads.html
+You can download Solr 4 from the Apache website: http://lucene.apache.org/solr/downloads.html
 
 I have also included the download in this module's directory as well in case internet speeds are poor. Either way, you should end up with a file named apache-solr-4.0.0.tgz.
 
@@ -42,7 +42,7 @@ Now, make a copy of the example so we can play around with it. If we ever break 
 
 ### Start Solr!
 
-To start the Solr server, go to the example directory that you created using the bash or some other Unix command shell and run the start jar.
+To start the Solr server, go to the example directory that you created using the bash or some other Unix command shell and run the start jar. Everything needed to run Solr is already included in the download, so starting Solr is as simple as the following command:
 
     java -jar start.jar
 
@@ -51,7 +51,7 @@ Solr will output quite a few log messages to the console which detail every phas
 	INFO: SolrDispatchFilter.init() done
 	2013-01-07 11:11:07.011:INFO:oejs.AbstractConnector:Started SocketConnector@0.0.0.0:8983
 
-This indicates that the Solr server (running inside an embedded Jetty server) is now ready to receive and process requests on TCP port 8983.
+This indicates that the Solr server (running inside an embedded Jetty server) is now ready to receive and process requests on TCP port 8983. The Solr process will run in this terminal window, so if you want to perform other terminal commands leave this one open and create another for your other commands.
 
 ### Verify Solr is Up and Running
 
@@ -201,7 +201,11 @@ Which responds with this response (shortened):
 		</doc>
 	...
 
-We'll get deeper into indexing and querying documents in Solr in the future modules. But for now, congratulations on installing Solr!
+We'll get deeper into indexing and querying documents in Solr in the future modules. You have completed this exercise, congratulations on installing Solr! Feel free to play around with your installation.
+
+### Shutting Solr Down
+
+You can shut Solr down by pressing CTRL+C on the terminal window in which you started Solr.
 
 Additional Resources
 -------

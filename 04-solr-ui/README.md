@@ -3,7 +3,7 @@ Real Time Search and Analytics on Big Data - Solr UI
 
 Introduction
 -------
-This exercise will guide you through the Solr UI. Feel free to click around and explore on your own too!
+This exercise will guide you through the Solr UI. Feel free to click around and explore on your own too! This exercise is intended to be run on the student's local environment and Solr installation.
 
 Prerequisites
 -------
