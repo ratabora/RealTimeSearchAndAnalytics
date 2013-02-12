@@ -13,12 +13,10 @@ Welcome to the Real Time Search and Analytics on Big Data tutorial. In this tuto
 * Lucene Indexing and Querying
 * Running Solr Locally
 * Using the Solr Administrative UI
-* Creating a Solr Schema
-* Indexing Documents in Solr
-* Querying the Solr Index
-* Demo - Real Time Indexing
-* Demo - Big Data Indexing
-* Running Solr Cloud
+* Understanding the Solr Schema
+* Indexing Documents via SolrJ
+* Translating SQL to Solr Queries
+* Real Time Indexing
 
 Tips
 -------
@@ -40,19 +38,8 @@ I would recommend the user has the following
 * Maven2Eclipse Plugin for Eclipse (not required, but aids in importing/building Maven projects)
 * Maven version 3 or higher (required to build shaded executable jars)
 
-### Environment
-
-There are two kinds of exercises
-Internet connectivity will be required to build the Maven projects as Maven will automatically download any dependencies specified in the POM file. 
-
 ### Knowledge
 Students should have some unix knowledge (basic commands like cd, ls, mkdir, etc). It is helpful but not required to know Java and SQL.
-
-### Set the properties
-
-Make sure to set all of the variables in the tutorial.properties file found in the exercises directory. These properties will be picked up by the all of the jar files in the exercises.
-
-For example:
 
 ### To Download Eclipse
 
