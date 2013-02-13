@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- Stocks schema for Lucene and Solr: The Definitive Guide -->
+
+<schema name="stocks" version="1.5">
+
+ <fields>
+   <field name="id" type="long" indexed="true" stored="true" required="true" multiValued="false" /> 
+   <field name="exchange" type="string" indexed="true" stored="true"/>
+   <field name="stock_symbol" type="string" indexed="true" stored="true"/>
+   <field name="ddate" type="date" indexed="true" stored="true"/>
+   <field name="stock_volume" type="long" indexed="true" stored="true"/>
+   <field name="stock_price_open"  type="double" indexed="true" stored="true"/>
+ </fields>
+
+ <uniqueKey>id</uniqueKey>
+
+ <types>
+  <fieldType name="string" class="solr.StrField"/>
+  <fieldType name="text" class="solr.TextField" autoGeneratePhraseQueries="true">
+    <analyzer>
+      <tokenizer class="solr.StandardTokenizerFactory"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
+  </fieldType>
+  <fieldType name="int" class="solr.TrieIntField"/>
+  <fieldType name="float" class="solr.TrieFloatField"/>
+  <fieldType name="long" class="solr.TrieLongField"/>
+  <fieldType name="double" class="solr.TrieDoubleField"/>
+  <fieldType name="date" class="solr.TrieDateField"/>
+  <fieldType name="boolean" class="solr.BoolField"/>
+ </types>
+
+</schema>

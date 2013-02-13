@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+
+<config>
+
+  <jmx />
+
+  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.RAMDirectoryFactory}"/>
+
+  <luceneMatchVersion>LUCENE_40</luceneMatchVersion>
+
+  <requestHandler name="search" class="solr.SearchHandler" default="true">
+     <lst name="defaults">
+       <str name="echoParams">explicit</str>
+       <int name="rows">10</int>
+     </lst>
+  </requestHandler>
+
+  <requestHandler name="standard" class="solr.StandardRequestHandler">
+    <bool name="httpCaching">true</bool>
+  </requestHandler>
+
+
+  <requestHandler name="/admin/" class="org.apache.solr.handler.admin.AdminHandlers" />
+
+  <requestDispatcher handleSelect="true" >
+    <requestParsers enableRemoteStreaming="true" multipartUploadLimitInKB="2048" />
+    <httpCaching lastModifiedFrom="openTime" etagSeed="Solr" never304="false">
+      <cacheControl>max-age=30, public</cacheControl>
+    </httpCaching>
+  </requestDispatcher>
+
+  <requestHandler name="/update" class="solr.UpdateRequestHandler" >
+    <lst name="defaults">
+      <str name="update.chain">lang_id</str>
+    </lst>
+  </requestHandler>  
+
+  <updateRequestProcessorChain name="lang_id">
+    <processor class="org.apache.solr.update.processor.TikaLanguageIdentifierUpdateProcessorFactory">
+	    <lst name="defaults">
+	      <bool name="langid">true</bool>
+	      <str name="langid.fl">name,description</str>
+	      <!-- <bool name="langid.map">true</bool> -->
+	      <!-- <str name="langid.langField">language_s</str> -->
+	
+	      <str name="langid.langField">category</str>
+	      <!--<str name="langid.langsField">language_sm</str>-->
+	      <!--<str name="langid.map.lcmap">th:thai</str>-->
+	      <!-- <float name="threshold">0.5</float> -->
+	      <float name="threshold">0.0</float>
+	
+	      <!--<str name="langid.fallback">fallback</str>-->
+	    </lst>
+    </processor>
+    <processor class="solr.RunUpdateProcessorFactory" />
+  </updateRequestProcessorChain>
+  
+   <!-- <updateRequestProcessorChain name="lang_id_alt">
+		<processor class="org.apache.solr.update.processor.LangDetectLanguageIdentifierUpdateProcessorFactory">
+	    <lst name="defaults">
+	      <bool name="langid">true</bool>
+	      <str name="langid.fl">name,subject</str>
+	      <bool name="langid.map">true</bool>
+	      <str name="langid.langField">language_s</str>
+	      <str name="langid.langsField">language_sm</str>
+	      <str name="langid.map.lcmap">th:thai</str>
+	      <float name="threshold">0.5</float>
+	      <str name="langid.fallback">fallback</str>
+	    </lst>
+		</processor>
+    <processor class="solr.RunUpdateProcessorFactory" />
+  </updateRequestProcessorChain>-->
+  
+</config>
