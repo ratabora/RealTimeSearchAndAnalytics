@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import junit.framework.Assert;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 
 import org.apache.solr.client.solrj.embedded.JettySolrRunner;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
