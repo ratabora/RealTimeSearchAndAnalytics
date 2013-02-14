@@ -1,5 +1,6 @@
 package com.ryantabora.tutorial;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -16,9 +17,16 @@ import junit.framework.Assert;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.solr.client.solrj.embedded.JettySolrRunner;
+import org.apache.solr.client.solrj.impl.HttpClientUtil;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
@@ -62,6 +70,7 @@ public class SQLtoSolr {
   private static Connection con;
   private static JettySolrRunner jetty;
   private static HttpSolrServer solrClient;
+  private static String solrUrl = "http://localhost:8983/solr";
   
   /**
    * Startup the embedded SQL and Solr services
@@ -122,8 +131,14 @@ public class SQLtoSolr {
   @Test
   public void testGroupByAve() throws Exception {
     System.out.println("***********Starting Group By Average Test***********");
-    sqlStockPriceGroupByAvg(con);
-    solrStockPriceGroupByAvg();
+    ArrayList<HashMap<String,String>> sqlResults = sqlStockPriceGroupByAvg(con);
+    ArrayList<HashMap<String,String>> solrResults = solrStockPriceGroupByAvg();
+    for (int i = 0; i < sqlResults.size() && i < solrResults.size(); i++) {
+      Assert.assertEquals(sqlResults.get(i).get("stock_symbol"), solrResults
+          .get(i).get("stock_symbol"));
+      Assert.assertEquals(sqlResults.get(i).get("mean").substring(0, 4),
+          solrResults.get(i).get("mean").substring(0, 4));
+    }
     System.out.println("***********End Group By Average Test***********");
   }
   
@@ -210,7 +225,7 @@ public class SQLtoSolr {
     jetty = new JettySolrRunner(solrHome, "/solr", 8983);
     jetty.start();
     
-    solrClient = new HttpSolrServer("http://localhost:8983/solr");
+    solrClient = new HttpSolrServer(solrUrl);
     solrClient.deleteByQuery("*:*");
     solrClient.commit();
     CSVParser csvParser = new CSVParser(new StringReader(sampleData));
@@ -369,8 +384,31 @@ public class SQLtoSolr {
     System.out.println("End Solr Query Parameters");
     System.out.println("===========================");
     QueryResponse qr = solrClient.query(params);
-    System.out.println(qr.toString());
     return qr;
+  }
+  
+  private static String querySolrJson(ModifiableSolrParams params)
+      throws ClientProtocolException, IOException {
+    params.set("wt", "json");
+    System.out.println("===========================");
+    System.out.println("Start Solr Query Parameters");
+    System.out.println("===========================");
+    System.out.println("Name : Value");
+    for (String n : params.getParameterNames()) {
+      String[] vals = params.getParams(n);
+      for (String v : vals) {
+        System.out.println(n + " : " + v);
+      }
+    }
+    System.out.println("===========================");
+    System.out.println("End Solr Query Parameters");
+    System.out.println("===========================");
+    HttpGet method = new HttpGet(solrUrl + "/select"
+        + ClientUtils.toQueryString(params, false));
+    HttpClient httpClient = HttpClientUtil
+        .createClient(new ModifiableSolrParams());
+    HttpResponse response = httpClient.execute(method);
+    return IOUtils.toString(response.getEntity().getContent());
   }
   
   private static ResultSet querySql(String query) throws SQLException {
@@ -432,14 +470,35 @@ public class SQLtoSolr {
   
   private static ArrayList<HashMap<String,String>> solrStockPriceGroupByAvg()
       throws Exception {
+    
+    // List to keep results ordered
+    // Map contains mean:value and stock_symbol:value pairs
+    ArrayList<HashMap<String,String>> groupAverages = new ArrayList<HashMap<String,String>>();
     ModifiableSolrParams params = new ModifiableSolrParams();
     params.set("stats", "true");
     params.set("stats.field", "stock_price_open");
     params.set("stats.facet", "stock_symbol");
     params.set("q", "*:*");
-    QueryResponse results = querySolr(params);
-    ArrayList<HashMap<String,String>> groupAverages = new ArrayList<HashMap<String,String>>();
-    JSONObject json = (JSONObject) JSONSerializer.toJSON(results.toString());
+    String jsonResults = querySolrJson(params);
+    JSONObject json = (JSONObject) JSONSerializer
+        .toJSON(jsonResults.toString());
+    JSONObject jsonAverages = json.getJSONObject("stats")
+        .getJSONObject("stats_fields").getJSONObject("stock_price_open")
+        .getJSONObject("facets").getJSONObject("stock_symbol");
+    for (Object key : jsonAverages.keySet()) {
+      HashMap<String,String> stockAverage = new HashMap<String,String>();
+      stockAverage.put("stock_symbol", key.toString());
+      stockAverage.put("mean", jsonAverages.getJSONObject(key.toString())
+          .getString("mean"));
+      groupAverages.add(stockAverage);
+    }
+    System.out.println("===========================");
+    System.out.println("Start Solr Results");
+    System.out.println("===========================");
+    System.out.println(groupAverages);
+    System.out.println("===========================");
+    System.out.println("End Solr Results");
+    System.out.println("===========================");
     return groupAverages;
   }
   
@@ -447,11 +506,21 @@ public class SQLtoSolr {
       Connection con) throws Exception {
     ResultSet results = querySql("SELECT stock_symbol, AVG(stock_price_open) FROM stocks GROUP BY stock_symbol");
     ArrayList<HashMap<String,String>> groupAverages = new ArrayList<HashMap<String,String>>();
+    
     while (results.next()) {
+      System.out.println();
       HashMap<String,String> kv = new HashMap<String,String>();
-      kv.put(results.getString(1), String.valueOf(results.getDouble(2)));
+      kv.put("stock_symbol", results.getString("stock_symbol"));
+      kv.put("mean", String.valueOf(results.getDouble(2)));
       groupAverages.add(kv);
     }
+    System.out.println("===========================");
+    System.out.println("Start SQL Results");
+    System.out.println("===========================");
+    System.out.println(groupAverages);
+    System.out.println("===========================");
+    System.out.println("End SQL Results");
+    System.out.println("===========================");
     return groupAverages;
   }
   

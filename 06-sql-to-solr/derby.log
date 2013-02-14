@@ -1,7 +1,7 @@
 ----------------------------------------------------------------
-Wed Feb 13 10:11:22 EST 2013:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.9.1.0 - (1344872): instance a816c00e-013c-d41c-2dd4-000004b96490 
-on database directory memory:/Users/ryantabora/Code/ryantabora/RealTimeSearchAndAnalytics/06-sql-to-solr/solr  with class loader sun.misc.Launcher$AppClassLoader@7a9664a1 
+Thu Feb 14 14:45:28 EST 2013:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.9.1.0 - (1344872): instance a816c00e-013c-da3d-7c46-000004a02e10 
+on database directory memory:/Users/ryantabora/Code/ryantabora/RealTimeSearchAndAnalytics/06-sql-to-solr/solr  with class loader sun.misc.Launcher$AppClassLoader@27a8c4e7 
 Loaded from file:/Users/ryantabora/.m2/repository/org/apache/derby/derby/10.9.1.0/derby-10.9.1.0.jar
 java.vendor=Apple Inc.
 java.runtime.version=1.6.0_37-b06-434-11M3909
