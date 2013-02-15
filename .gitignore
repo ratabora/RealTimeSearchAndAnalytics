@@ -25,3 +25,5 @@ talkbackup
 
 
 06-sql-to-solr/stocks/collection1/data/index
+
+06-sql-to-solr/derby.log

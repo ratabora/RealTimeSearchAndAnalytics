@@ -144,14 +144,22 @@ public class SQLtoSolr {
   
   @Test
   public void testPriceRange() throws Exception {
-    sqlStockPriceRange(con);
-    solrStockPriceRange();
+    System.out.println("***********Starting Price Range Test***********");
+    Assert.assertEquals(sqlStockPriceRange(con), solrStockPriceRange());
+    System.out.println("***********End Price Range Test***********");
   }
   
   @Test
   public void testSort() throws Exception {
-    sqlStockSort(con);
-    solrStockSort();
+    System.out.println("***********Starting Sort Test***********");
+    Assert.assertEquals(sqlStockSort(con), solrStockSort());
+    System.out.println("***********End Sort Test***********");
+  }
+  
+  @Test
+  public void testComplexQuery() throws Exception {
+    sqlComplexQuery1(con);
+    solrComplexQuery1();
   }
   
   @Test
@@ -169,12 +177,6 @@ public class SQLtoSolr {
   @Test
   public void testStockPriceRange() throws Exception {
     solrStockPriceRange2();
-  }
-  
-  @Test
-  public void testComplexQuery() throws Exception {
-    sqlComplexQuery1(con);
-    solrComplexQuery1();
   }
   
   private static void initSQL() throws Exception {
@@ -524,21 +526,63 @@ public class SQLtoSolr {
     return groupAverages;
   }
   
-  private static void solrStockPriceRange() throws Exception {
+  private static ArrayList<HashMap<String,String>> solrStockPriceRange()
+      throws Exception {
     ModifiableSolrParams params = new ModifiableSolrParams();
     params.set("q", "+stock_price_open:[2.38 TO 2.64] +stock_symbol:QTM");
-    querySolr(params);
+    return createDocs(querySolr(params));
   }
   
-  private static void sqlStockPriceRange(Connection con) throws Exception {
-    String s1 = "SELECT * FROM stocks "
+  private static ArrayList<HashMap<String,String>> sqlStockPriceRange(
+      Connection con) throws Exception {
+    String query = "SELECT * FROM stocks "
         + "WHERE stock_symbol = 'QTM' AND (stock_price_open <= 2.64 AND stock_price_open >= 2.38)";
-    System.out.println(s1);
-    PreparedStatement ps1 = con.prepareStatement(s1);
-    ResultSet rs1 = ps1.executeQuery();
-    while (rs1.next()) {
-      // printSQLResult(rs1);
-    }
+    return createDocs(querySql(query));
+    // PreparedStatement ps1 = con.prepareStatement(s1);
+    // ResultSet rs1 = ps1.executeQuery();
+    // while (rs1.next()) {
+    // // printSQLResult(rs1);
+    // }
+  }
+  
+  private static ArrayList<HashMap<String,String>> solrStockSort()
+      throws Exception {
+    ModifiableSolrParams params = new ModifiableSolrParams();
+    params.set("indent", "true");
+    params.set("q", "+stock_symbol:QTM +stock_price_open:[* TO *]");
+    params.set("sort", "stock_price_open desc");
+    return createDocs(querySolr(params));
+  }
+  
+  private static ArrayList<HashMap<String,String>> sqlStockSort(Connection con)
+      throws Exception {
+    String query = "SELECT * FROM stocks WHERE NOT stock_price_open IS NULL AND stock_symbol = 'QTM' ORDER BY stock_price_open DESC";
+    return createDocs(querySql(query));
+  }
+  
+  private static ArrayList<HashMap<String,String>> sqlComplexQuery1(
+      Connection con) throws Exception {
+    String s1 = "SELECT * FROM stocks "
+        + "WHERE (stock_symbol = 'QTM' AND stock_price_open > 2.57)"
+        + " OR (stock_symbol = 'QRR' AND stock_volume >= 95000 AND stock_volume < 173000)"
+        + " ORDER BY stock_volume DESC,stock_price_open ASC";
+    // System.out.println(s1);
+    // PreparedStatement ps1 = con.prepareStatement(s1);
+    // ResultSet rs1 = ps1.executeQuery();
+    // while (rs1.next()) {
+    // // printSQLResult(rs1);
+    // }
+    return createDocs(querySql(s1));
+  }
+  
+  private static ArrayList<HashMap<String,String>> solrComplexQuery1()
+      throws Exception {
+    ModifiableSolrParams params = new ModifiableSolrParams();
+    params.set("indent", "true");
+    params.set("q", "(+stock_symbol:QTM +stock_price_open:{2.57 TO *]) "
+        + "(+stock_symbol:QRR +stock_volume:[95000 TO 173000})");
+    params.set("sort", "stock_volume desc,stock_price_open asc");
+    return createDocs(querySolr(params));
   }
   
   private static void solrStockPriceRange2() throws Exception {
@@ -547,25 +591,6 @@ public class SQLtoSolr {
     params.set("q", "+stock_price_open:[2.38 TO 2.64} +stock_symbol:QTM");
     
     // printSolrResults(querySolr(params));
-  }
-  
-  private static void solrStockSort() throws Exception {
-    ModifiableSolrParams params = new ModifiableSolrParams();
-    params.set("indent", "true");
-    params.set("q", "+stock_symbol:QTM +stock_price_open:[* TO *]");
-    params.set("sort", "stock_price_open desc");
-    
-    // printSolrResults(querySolr(params));
-  }
-  
-  private static void sqlStockSort(Connection con) throws Exception {
-    String s1 = "SELECT * FROM stocks WHERE NOT stock_price_open IS NULL AND stock_symbol = 'QTM' ORDER BY stock_price_open DESC";
-    System.out.println(s1);
-    PreparedStatement ps1 = con.prepareStatement(s1);
-    ResultSet rs1 = ps1.executeQuery();
-    while (rs1.next()) {
-      // printSQLResult(rs1);
-    }
   }
   
   private static void stockPriceOpenAgg() throws Exception {
@@ -645,28 +670,6 @@ public class SQLtoSolr {
     while (rs1.next()) {
       // printSQLResult(rs1);
     }
-  }
-  
-  private static void sqlComplexQuery1(Connection con) throws Exception {
-    String s1 = "SELECT * FROM stocks "
-        + "WHERE (stock_symbol = 'QTM' AND stock_price_open > 2.57)"
-        + " OR (stock_symbol = 'QRR' AND stock_volume >= 95000 AND stock_volume < 173000)"
-        + " ORDER BY stock_volume DESC,stock_price_open ASC";
-    System.out.println(s1);
-    PreparedStatement ps1 = con.prepareStatement(s1);
-    ResultSet rs1 = ps1.executeQuery();
-    while (rs1.next()) {
-      // printSQLResult(rs1);
-    }
-  }
-  
-  private static void solrComplexQuery1() throws Exception {
-    ModifiableSolrParams params = new ModifiableSolrParams();
-    params.set("indent", "true");
-    params.set("q", "(+stock_symbol:QTM +stock_price_open:{2.57 TO *]) "
-        + "(+stock_symbol:QRR +stock_volume:[95000 TO 173000})");
-    params.set("sort", "stock_volume desc,stock_price_open asc");
-    querySolr(params);
   }
   
   private static void sqlLikeQuery1(Connection con) throws Exception {
