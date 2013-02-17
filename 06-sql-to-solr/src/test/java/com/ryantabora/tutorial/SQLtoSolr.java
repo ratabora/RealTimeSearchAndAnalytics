@@ -70,7 +70,7 @@ public class SQLtoSolr {
   private static Connection con;
   private static JettySolrRunner jetty;
   private static HttpSolrServer solrClient;
-  private static String solrUrl = "http://localhost:8983/solr";
+  private static String solrUrl = "http://127.0.0.1:8983/solr";
   
   /**
    * Startup the embedded SQL and Solr services
