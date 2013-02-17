@@ -94,21 +94,28 @@ public class SQLtoSolr {
   }
   
   @Test
+  public void testCount() throws Exception {
+    System.out.println("***********Starting Count Test***********");
+    Assert.assertEquals(sqlCount(con), solrCount());
+    System.out.println("***********End Count Test***********");
+  }
+  
+  @Test
   public void testMax() throws Exception {
-    sqlmax1(con);
-    sqlmax2(con);
-    // TODO: Create Solr Comparison
+    System.out.println("***********Starting Max Test***********");
+    Assert.assertEquals(sqlMax(con), solrMax());
+    System.out.println("***********End Max Test***********");
   }
   
   @Test
   public void testMin() throws Exception {
-    sqlmin1(con);
+    sqlMin(con);
     // TODO: Create Solr Comparison
   }
   
   @Test
   public void testSum() throws Exception {
-    sqlsum1(con);
+    sqlSum(con);
     // TODO: Create Solr Comparison
   }
   
@@ -158,25 +165,20 @@ public class SQLtoSolr {
   
   @Test
   public void testComplexQuery() throws Exception {
-    sqlComplexQuery1(con);
-    solrComplexQuery1();
-  }
-  
-  @Test
-  public void testCount() throws Exception {
-    sqlCount1(con);
-    // TODO: Create Solr Comparison
-  }
-  
-  @Test
-  public void testPriceOpenAgg() throws Exception {
-    // stockPriceOpenAgg();
+    System.out.println("***********Starting Complex Test***********");
+    Assert.assertEquals(sqlComplexQuery1(con), solrComplexQuery1());
+    System.out.println("***********End Complex Test***********");
     
   }
   
   @Test
+  public void testPriceOpenAgg() throws Exception {
+    stockPriceOpenAgg();
+  }
+  
+  @Test
   public void testStockPriceRange() throws Exception {
-    solrStockPriceRange2();
+    solrRange();
   }
   
   private static void initSQL() throws Exception {
@@ -465,7 +467,7 @@ public class SQLtoSolr {
       throws Exception {
     // Typically, SQL syntax would dictate a query like LIMIT 9, 6 to retrieve
     // 6 documents starting at an offset of 9. However, Derby does not support
-    // LIMIT so we must add a WHERE claus to limit the result set
+    // LIMIT so we must add a WHERE clause to limit the result set
     ResultSet results = querySql("SELECT id,exchange,stock_volume FROM stocks WHERE id > 9");
     return createDocs(results);
   }
@@ -508,9 +510,7 @@ public class SQLtoSolr {
       Connection con) throws Exception {
     ResultSet results = querySql("SELECT stock_symbol, AVG(stock_price_open) FROM stocks GROUP BY stock_symbol");
     ArrayList<HashMap<String,String>> groupAverages = new ArrayList<HashMap<String,String>>();
-    
     while (results.next()) {
-      System.out.println();
       HashMap<String,String> kv = new HashMap<String,String>();
       kv.put("stock_symbol", results.getString("stock_symbol"));
       kv.put("mean", String.valueOf(results.getDouble(2)));
@@ -562,17 +562,11 @@ public class SQLtoSolr {
   
   private static ArrayList<HashMap<String,String>> sqlComplexQuery1(
       Connection con) throws Exception {
-    String s1 = "SELECT * FROM stocks "
+    String query = "SELECT * FROM stocks "
         + "WHERE (stock_symbol = 'QTM' AND stock_price_open > 2.57)"
         + " OR (stock_symbol = 'QRR' AND stock_volume >= 95000 AND stock_volume < 173000)"
         + " ORDER BY stock_volume DESC,stock_price_open ASC";
-    // System.out.println(s1);
-    // PreparedStatement ps1 = con.prepareStatement(s1);
-    // ResultSet rs1 = ps1.executeQuery();
-    // while (rs1.next()) {
-    // // printSQLResult(rs1);
-    // }
-    return createDocs(querySql(s1));
+    return createDocs(querySql(query));
   }
   
   private static ArrayList<HashMap<String,String>> solrComplexQuery1()
@@ -585,7 +579,36 @@ public class SQLtoSolr {
     return createDocs(querySolr(params));
   }
   
-  private static void solrStockPriceRange2() throws Exception {
+  private static Integer sqlCount(Connection con) throws Exception {
+    String query = "SELECT COUNT(*) FROM stocks WHERE stock_symbol = 'QRR'";
+    ResultSet rs = querySql(query);
+    rs.next();
+    System.out.println("===========================");
+    System.out.println("Start SQL Results");
+    System.out.println("===========================");
+    System.out.println("QRR Count : " + String.valueOf(rs.getInt(1)));
+    System.out.println("===========================");
+    System.out.println("End SQL Results");
+    System.out.println("===========================");
+    return rs.getInt(1);
+  }
+  
+  private static Integer solrCount() throws Exception {
+    ModifiableSolrParams params = new ModifiableSolrParams();
+    params.set("q", "stock_symbol:QRR");
+    QueryResponse qr = querySolr(params);
+    System.out.println("===========================");
+    System.out.println("Start Solr Results");
+    System.out.println("===========================");
+    System.out.println("QRR Count : "
+        + String.valueOf(qr.getResults().getNumFound()));
+    System.out.println("===========================");
+    System.out.println("End Solr Results");
+    System.out.println("===========================");
+    return (int) qr.getResults().getNumFound();
+  }
+  
+  private static void solrRange() throws Exception {
     ModifiableSolrParams params = new ModifiableSolrParams();
     params.set("indent", "true");
     params.set("q", "+stock_price_open:[2.38 TO 2.64} +stock_symbol:QTM");
@@ -603,7 +626,7 @@ public class SQLtoSolr {
     // printSolrResults(querySolr(params));
   }
   
-  private static void sqlavg1(Connection con) throws Exception {
+  private static void sqlAverage(Connection con) throws Exception {
     String s1 = "SELECT AVG(stock_volume) FROM stocks WHERE stock_symbol = ?";
     System.out.println(s1);
     PreparedStatement ps1 = con.prepareStatement(s1);
@@ -615,7 +638,7 @@ public class SQLtoSolr {
     }
   }
   
-  private static void sqlsum1(Connection con) throws Exception {
+  private static void sqlSum(Connection con) throws Exception {
     String s1 = "SELECT SUM(stock_volume) FROM stocks WHERE stock_symbol = ?";
     System.out.println(s1);
     PreparedStatement ps1 = con.prepareStatement(s1);
@@ -627,7 +650,7 @@ public class SQLtoSolr {
     }
   }
   
-  private static void sqlmin1(Connection con) throws Exception {
+  private static void sqlMin(Connection con) throws Exception {
     String s1 = "SELECT MIN(stock_volume) FROM stocks WHERE stock_symbol = ?";
     System.out.println(s1);
     PreparedStatement ps1 = con.prepareStatement(s1);
@@ -639,40 +662,51 @@ public class SQLtoSolr {
     }
   }
   
-  private static void sqlmax2(Connection con) throws Exception {
-    String s1 = "SELECT MAX(stock_volume) FROM stocks WHERE stock_symbol = ?";
-    System.out.println(s1);
-    PreparedStatement ps1 = con.prepareStatement(s1);
-    ps1.setString(1, "QTM");
-    ResultSet rs1 = ps1.executeQuery();
-    if (rs1.next()) {
-      long maxvol = rs1.getLong(1);
-      System.out.println(maxvol);
-    }
+  private static long sqlMax(Connection con) throws Exception {
+    String query = "SELECT MAX(stock_volume) FROM stocks";
+    ResultSet rs = querySql(query);
+    rs.next();
+    System.out.println("===========================");
+    System.out.println("Start SQL Results");
+    System.out.println("===========================");
+    System.out.println("Max Stock Volume Count : "
+        + String.valueOf(rs.getLong(1)));
+    System.out.println("===========================");
+    System.out.println("End SQL Results");
+    System.out.println("===========================");
+    return rs.getLong(1);
   }
   
-  private static void sqlmax1(Connection con) throws Exception {
-    String s1 = "SELECT MAX(stock_volume) FROM stocks";
-    System.out.println(s1);
-    PreparedStatement ps1 = con.prepareStatement(s1);
-    ResultSet rs1 = ps1.executeQuery();
-    if (rs1.next()) {
-      long maxvol = rs1.getLong(1);
-      System.out.println(maxvol);
-    }
+  private static long solrMax() throws Exception {
+    ModifiableSolrParams params = new ModifiableSolrParams();
+    params.set("q", "*:*");
+    params.set("sort", "stock_volume desc");
+    params.set("rows", "1");
+    params.set("fl", "stock_volume");
+    QueryResponse qr = querySolr(params);
+    System.out.println("===========================");
+    System.out.println("Start Solr Results");
+    System.out.println("===========================");
+    System.out.println("Max Stock Volume Count : "
+        + String.valueOf(qr.getFacetField("stock_volume").getValues().get(0)
+            .getCount()));
+    System.out.println("===========================");
+    System.out.println("End Solr Results");
+    System.out.println("===========================");
+    return qr.getFacetField("stock_volume").getValues().get(0).getCount();
   }
   
-  private static void sqlorderby1(Connection con) throws Exception {
-    String s1 = "SELECT * FROM stocks ORDER BY stock_volume ASC";
-    System.out.println(s1);
-    PreparedStatement ps1 = con.prepareStatement(s1);
-    ResultSet rs1 = ps1.executeQuery();
-    while (rs1.next()) {
+  private static void sqlOrderby(Connection con) throws Exception {
+    String query = "SELECT * FROM stocks ORDER BY stock_volume ASC";
+    System.out.println(query);
+    PreparedStatement ps = con.prepareStatement(query);
+    ResultSet rs = ps.executeQuery();
+    while (rs.next()) {
       // printSQLResult(rs1);
     }
   }
   
-  private static void sqlLikeQuery1(Connection con) throws Exception {
+  private static void sqlLike(Connection con) throws Exception {
     String s1 = "SELECT * FROM stocks " + "WHERE stock_symbol LIKE 'Q%'";
     System.out.println(s1);
     PreparedStatement ps1 = con.prepareStatement(s1);
@@ -682,18 +716,7 @@ public class SQLtoSolr {
     }
   }
   
-  private static void sqlCount1(Connection con) throws Exception {
-    String s1 = "SELECT COUNT(*) FROM stocks WHERE stock_symbol = 'QRR'";
-    System.out.println(s1);
-    PreparedStatement ps1 = con.prepareStatement(s1);
-    ResultSet rs1 = ps1.executeQuery();
-    while (rs1.next()) {
-      int c = rs1.getInt(1);
-      System.out.println(c);
-    }
-  }
-  
-  private static void sqlUpdate1(Connection con) throws Exception {
+  private static void sqlUpdate(Connection con) throws Exception {
     String s1 = "UPDATE stocks SET stock_volume = ? WHERE stock_symbol = 'QRR' AND ddate = ?";
     System.out.println(s1);
     PreparedStatement ps1 = con.prepareStatement(s1);
