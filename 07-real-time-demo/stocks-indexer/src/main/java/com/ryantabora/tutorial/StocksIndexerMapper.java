@@ -50,7 +50,7 @@ public class StocksIndexerMapper extends TableMapper<Text,Text> {
         
       }
       solrServer.add(solrDoc);
-      solrServer.commit();
+      solrServer.commit(true, true, true);
     } catch (SolrServerException e) {
       System.err.println("Failed to update Solr with document "
           + new String(hbaseResult.getRow()));
