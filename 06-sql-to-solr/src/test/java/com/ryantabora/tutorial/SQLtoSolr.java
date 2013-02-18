@@ -25,6 +25,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.solr.client.solrj.embedded.JettySolrRunner;
 import org.apache.solr.client.solrj.impl.HttpClientUtil;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
@@ -91,94 +93,6 @@ public class SQLtoSolr {
   @AfterClass
   public static void cleanup() throws Exception {
     jetty.stop();
-  }
-  
-  @Test
-  public void testCount() throws Exception {
-    System.out.println("***********Starting Count Test***********");
-    Assert.assertEquals(sqlCount(con), solrCount());
-    System.out.println("***********End Count Test***********");
-  }
-  
-  @Test
-  public void testMax() throws Exception {
-    System.out.println("***********Starting Max Test***********");
-    Assert.assertEquals(sqlMax(con), solrMax());
-    System.out.println("***********End Max Test***********");
-  }
-  
-  @Test
-  public void testMin() throws Exception {
-    sqlMin(con);
-    // TODO: Create Solr Comparison
-  }
-  
-  @Test
-  public void testSum() throws Exception {
-    sqlSum(con);
-    // TODO: Create Solr Comparison
-  }
-  
-  @Test
-  public void testStockPriceNull() throws Exception {
-    System.out.println("***********Starting Stock Price Null Test***********");
-    Assert.assertEquals(sqlStockPriceNull(con), solrStockPriceNull());
-    System.out.println("***********End Stock Price Null Test***********");
-    
-  }
-  
-  @Test
-  public void testSelectLimit() throws Exception {
-    System.out.println("***********Starting Select Limit Test***********");
-    Assert.assertEquals(sqlSelectLimit(con).toString(), solrSelectLimit()
-        .toString());
-    System.out.println("***********End Select Limit Test***********");
-  }
-  
-  @Test
-  public void testGroupByAve() throws Exception {
-    System.out.println("***********Starting Group By Average Test***********");
-    ArrayList<HashMap<String,String>> sqlResults = sqlStockPriceGroupByAvg(con);
-    ArrayList<HashMap<String,String>> solrResults = solrStockPriceGroupByAvg();
-    for (int i = 0; i < sqlResults.size() && i < solrResults.size(); i++) {
-      Assert.assertEquals(sqlResults.get(i).get("stock_symbol"), solrResults
-          .get(i).get("stock_symbol"));
-      Assert.assertEquals(sqlResults.get(i).get("mean").substring(0, 4),
-          solrResults.get(i).get("mean").substring(0, 4));
-    }
-    System.out.println("***********End Group By Average Test***********");
-  }
-  
-  @Test
-  public void testPriceRange() throws Exception {
-    System.out.println("***********Starting Price Range Test***********");
-    Assert.assertEquals(sqlStockPriceRange(con), solrStockPriceRange());
-    System.out.println("***********End Price Range Test***********");
-  }
-  
-  @Test
-  public void testSort() throws Exception {
-    System.out.println("***********Starting Sort Test***********");
-    Assert.assertEquals(sqlStockSort(con), solrStockSort());
-    System.out.println("***********End Sort Test***********");
-  }
-  
-  @Test
-  public void testComplexQuery() throws Exception {
-    System.out.println("***********Starting Complex Test***********");
-    Assert.assertEquals(sqlComplexQuery1(con), solrComplexQuery1());
-    System.out.println("***********End Complex Test***********");
-    
-  }
-  
-  @Test
-  public void testPriceOpenAgg() throws Exception {
-    stockPriceOpenAgg();
-  }
-  
-  @Test
-  public void testStockPriceRange() throws Exception {
-    solrRange();
   }
   
   private static void initSQL() throws Exception {
@@ -428,6 +342,183 @@ public class SQLtoSolr {
     return rs;
   }
   
+  @Test
+  public void testCount() throws Exception {
+    System.out.println("***********Starting Count Test***********");
+    Assert.assertEquals(sqlCount(con), solrCount());
+    System.out.println("***********End Count Test***********");
+  }
+  
+  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
+  // cols)
+  // throws Exception {
+  // SolrInputDocument solrInputDocument = new SolrInputDocument();
+  // String str = "";
+  // for (String col : cols) {
+  // col = col.toLowerCase();
+  // Object obj = rs.getObject(col);
+  // str += " | " + obj;
+  // solrInputDocument.addField(col, obj);
+  // }
+  // System.out.println(str);
+  // return solrInputDocument;
+  // }
+  
+  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
+  // ResultSetMetaData rsmd = rs.getMetaData();
+  // int c = rsmd.getColumnCount();
+  // List<String> cols = new ArrayList<String>();
+  // for (int x = 1; x <= c; x++) {
+  // String cname = rsmd.getColumnName(x);
+  // cols.add(cname);
+  // }
+  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
+  // System.out.println(header);
+  // return cols;
+  // }
+  
+  private static Integer sqlCount(Connection con) throws Exception {
+    String query = "SELECT COUNT(*) FROM stocks WHERE stock_symbol = 'QRR'";
+    ResultSet rs = querySql(query);
+    rs.next();
+    System.out.println("===========================");
+    System.out.println("Start SQL Results");
+    System.out.println("===========================");
+    System.out.println("QRR Count : " + String.valueOf(rs.getInt(1)));
+    System.out.println("===========================");
+    System.out.println("End SQL Results");
+    System.out.println("===========================");
+    return rs.getInt(1);
+  }
+  
+  private static Integer solrCount() throws Exception {
+    ModifiableSolrParams params = new ModifiableSolrParams();
+    params.set("q", "stock_symbol:QRR");
+    QueryResponse qr = querySolr(params);
+    System.out.println("===========================");
+    System.out.println("Start Solr Results");
+    System.out.println("===========================");
+    System.out.println("QRR Count : "
+        + String.valueOf(qr.getResults().getNumFound()));
+    System.out.println("===========================");
+    System.out.println("End Solr Results");
+    System.out.println("===========================");
+    return (int) qr.getResults().getNumFound();
+  }
+  
+  @Test
+  public void testMax() throws Exception {
+    System.out.println("***********Starting Max Test***********");
+    Assert.assertEquals(sqlMax(con), solrMax());
+    System.out.println("***********End Max Test***********");
+  }
+  
+  private static long sqlMax(Connection con) throws Exception {
+    String query = "SELECT MAX(stock_volume) FROM stocks";
+    ResultSet rs = querySql(query);
+    rs.next();
+    System.out.println("===========================");
+    System.out.println("Start SQL Results");
+    System.out.println("===========================");
+    System.out.println("Max Stock Volume Count : "
+        + String.valueOf(rs.getLong(1)));
+    System.out.println("===========================");
+    System.out.println("End SQL Results");
+    System.out.println("===========================");
+    return rs.getLong(1);
+  }
+  
+  private static long solrMax() throws Exception {
+    ModifiableSolrParams params = new ModifiableSolrParams();
+    params.set("q", "*:*");
+    params.set("sort", "stock_volume desc");
+    params.set("rows", "1");
+    params.set("fl", "stock_volume");
+    QueryResponse qr = querySolr(params);
+    System.out.println("===========================");
+    System.out.println("Start Solr Results");
+    System.out.println("===========================");
+    long maxVolume = (Long) qr.getResults().get(0)
+        .getFieldValue("stock_volume");
+    System.out.println("Max Stock Volume Count : " + maxVolume);
+    System.out.println("===========================");
+    System.out.println("End Solr Results");
+    System.out.println("===========================");
+    return maxVolume;
+  }
+  
+  @Test
+  public void testMin() throws Exception {
+    sqlMin(con);
+    // TODO: Create Solr Comparison
+  }
+  
+  private static void sqlMin(Connection con) throws Exception {
+    String s1 = "SELECT MIN(stock_volume) FROM stocks WHERE stock_symbol = ?";
+    System.out.println(s1);
+    PreparedStatement ps1 = con.prepareStatement(s1);
+    ps1.setString(1, "QTM");
+    ResultSet rs1 = ps1.executeQuery();
+    if (rs1.next()) {
+      long maxvol = rs1.getLong(1);
+      System.out.println(maxvol);
+    }
+  }
+  
+  @Test
+  public void testSum() throws Exception {
+    sqlSum(con);
+    // TODO: Create Solr Comparison
+  }
+  
+  private static void sqlSum(Connection con) throws Exception {
+    String s1 = "SELECT SUM(stock_volume) FROM stocks WHERE stock_symbol = ?";
+    System.out.println(s1);
+    PreparedStatement ps1 = con.prepareStatement(s1);
+    ps1.setString(1, "QTM");
+    ResultSet rs1 = ps1.executeQuery();
+    if (rs1.next()) {
+      long maxvol = rs1.getLong(1);
+      System.out.println(maxvol);
+    }
+  }
+  
+  @Test
+  public void testStockPriceNull() throws Exception {
+    System.out.println("***********Starting Stock Price Null Test***********");
+    Assert.assertEquals(sqlStockPriceNull(con), solrStockPriceNull());
+    System.out.println("***********End Stock Price Null Test***********");
+    
+  }
+  
+  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
+  // cols)
+  // throws Exception {
+  // SolrInputDocument solrInputDocument = new SolrInputDocument();
+  // String str = "";
+  // for (String col : cols) {
+  // col = col.toLowerCase();
+  // Object obj = rs.getObject(col);
+  // str += " | " + obj;
+  // solrInputDocument.addField(col, obj);
+  // }
+  // System.out.println(str);
+  // return solrInputDocument;
+  // }
+  
+  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
+  // ResultSetMetaData rsmd = rs.getMetaData();
+  // int c = rsmd.getColumnCount();
+  // List<String> cols = new ArrayList<String>();
+  // for (int x = 1; x <= c; x++) {
+  // String cname = rsmd.getColumnName(x);
+  // cols.add(cname);
+  // }
+  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
+  // System.out.println(header);
+  // return cols;
+  // }
+  
   /**
    * Create a Solr query that looks for a record where the stock price is null
    * 
@@ -452,6 +543,42 @@ public class SQLtoSolr {
     return createDocs(results);
   }
   
+  @Test
+  public void testSelectLimit() throws Exception {
+    System.out.println("***********Starting Select Limit Test***********");
+    Assert.assertEquals(sqlSelectLimit(con).toString(), solrSelectLimit()
+        .toString());
+    System.out.println("***********End Select Limit Test***********");
+  }
+  
+  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
+  // cols)
+  // throws Exception {
+  // SolrInputDocument solrInputDocument = new SolrInputDocument();
+  // String str = "";
+  // for (String col : cols) {
+  // col = col.toLowerCase();
+  // Object obj = rs.getObject(col);
+  // str += " | " + obj;
+  // solrInputDocument.addField(col, obj);
+  // }
+  // System.out.println(str);
+  // return solrInputDocument;
+  // }
+  
+  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
+  // ResultSetMetaData rsmd = rs.getMetaData();
+  // int c = rsmd.getColumnCount();
+  // List<String> cols = new ArrayList<String>();
+  // for (int x = 1; x <= c; x++) {
+  // String cname = rsmd.getColumnName(x);
+  // cols.add(cname);
+  // }
+  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
+  // System.out.println(header);
+  // return cols;
+  // }
+  
   private static ArrayList<HashMap<String,String>> solrSelectLimit()
       throws Exception {
     ModifiableSolrParams params = new ModifiableSolrParams();
@@ -471,6 +598,48 @@ public class SQLtoSolr {
     ResultSet results = querySql("SELECT id,exchange,stock_volume FROM stocks WHERE id > 9");
     return createDocs(results);
   }
+  
+  @Test
+  public void testGroupByAve() throws Exception {
+    System.out.println("***********Starting Group By Average Test***********");
+    ArrayList<HashMap<String,String>> sqlResults = sqlStockPriceGroupByAvg(con);
+    ArrayList<HashMap<String,String>> solrResults = solrStockPriceGroupByAvg();
+    for (int i = 0; i < sqlResults.size() && i < solrResults.size(); i++) {
+      Assert.assertEquals(sqlResults.get(i).get("stock_symbol"), solrResults
+          .get(i).get("stock_symbol"));
+      Assert.assertEquals(sqlResults.get(i).get("mean").substring(0, 4),
+          solrResults.get(i).get("mean").substring(0, 4));
+    }
+    System.out.println("***********End Group By Average Test***********");
+  }
+  
+  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
+  // cols)
+  // throws Exception {
+  // SolrInputDocument solrInputDocument = new SolrInputDocument();
+  // String str = "";
+  // for (String col : cols) {
+  // col = col.toLowerCase();
+  // Object obj = rs.getObject(col);
+  // str += " | " + obj;
+  // solrInputDocument.addField(col, obj);
+  // }
+  // System.out.println(str);
+  // return solrInputDocument;
+  // }
+  
+  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
+  // ResultSetMetaData rsmd = rs.getMetaData();
+  // int c = rsmd.getColumnCount();
+  // List<String> cols = new ArrayList<String>();
+  // for (int x = 1; x <= c; x++) {
+  // String cname = rsmd.getColumnName(x);
+  // cols.add(cname);
+  // }
+  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
+  // System.out.println(header);
+  // return cols;
+  // }
   
   private static ArrayList<HashMap<String,String>> solrStockPriceGroupByAvg()
       throws Exception {
@@ -526,6 +695,41 @@ public class SQLtoSolr {
     return groupAverages;
   }
   
+  @Test
+  public void testPriceRange() throws Exception {
+    System.out.println("***********Starting Price Range Test***********");
+    Assert.assertEquals(sqlStockPriceRange(con), solrStockPriceRange());
+    System.out.println("***********End Price Range Test***********");
+  }
+  
+  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
+  // cols)
+  // throws Exception {
+  // SolrInputDocument solrInputDocument = new SolrInputDocument();
+  // String str = "";
+  // for (String col : cols) {
+  // col = col.toLowerCase();
+  // Object obj = rs.getObject(col);
+  // str += " | " + obj;
+  // solrInputDocument.addField(col, obj);
+  // }
+  // System.out.println(str);
+  // return solrInputDocument;
+  // }
+  
+  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
+  // ResultSetMetaData rsmd = rs.getMetaData();
+  // int c = rsmd.getColumnCount();
+  // List<String> cols = new ArrayList<String>();
+  // for (int x = 1; x <= c; x++) {
+  // String cname = rsmd.getColumnName(x);
+  // cols.add(cname);
+  // }
+  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
+  // System.out.println(header);
+  // return cols;
+  // }
+  
   private static ArrayList<HashMap<String,String>> solrStockPriceRange()
       throws Exception {
     ModifiableSolrParams params = new ModifiableSolrParams();
@@ -545,6 +749,41 @@ public class SQLtoSolr {
     // }
   }
   
+  @Test
+  public void testSort() throws Exception {
+    System.out.println("***********Starting Sort Test***********");
+    Assert.assertEquals(sqlStockSort(con), solrStockSort());
+    System.out.println("***********End Sort Test***********");
+  }
+  
+  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
+  // cols)
+  // throws Exception {
+  // SolrInputDocument solrInputDocument = new SolrInputDocument();
+  // String str = "";
+  // for (String col : cols) {
+  // col = col.toLowerCase();
+  // Object obj = rs.getObject(col);
+  // str += " | " + obj;
+  // solrInputDocument.addField(col, obj);
+  // }
+  // System.out.println(str);
+  // return solrInputDocument;
+  // }
+  
+  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
+  // ResultSetMetaData rsmd = rs.getMetaData();
+  // int c = rsmd.getColumnCount();
+  // List<String> cols = new ArrayList<String>();
+  // for (int x = 1; x <= c; x++) {
+  // String cname = rsmd.getColumnName(x);
+  // cols.add(cname);
+  // }
+  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
+  // System.out.println(header);
+  // return cols;
+  // }
+  
   private static ArrayList<HashMap<String,String>> solrStockSort()
       throws Exception {
     ModifiableSolrParams params = new ModifiableSolrParams();
@@ -559,6 +798,42 @@ public class SQLtoSolr {
     String query = "SELECT * FROM stocks WHERE NOT stock_price_open IS NULL AND stock_symbol = 'QTM' ORDER BY stock_price_open DESC";
     return createDocs(querySql(query));
   }
+  
+  @Test
+  public void testComplexQuery() throws Exception {
+    System.out.println("***********Starting Complex Test***********");
+    Assert.assertEquals(sqlComplexQuery1(con), solrComplexQuery1());
+    System.out.println("***********End Complex Test***********");
+    
+  }
+  
+  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
+  // cols)
+  // throws Exception {
+  // SolrInputDocument solrInputDocument = new SolrInputDocument();
+  // String str = "";
+  // for (String col : cols) {
+  // col = col.toLowerCase();
+  // Object obj = rs.getObject(col);
+  // str += " | " + obj;
+  // solrInputDocument.addField(col, obj);
+  // }
+  // System.out.println(str);
+  // return solrInputDocument;
+  // }
+  
+  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
+  // ResultSetMetaData rsmd = rs.getMetaData();
+  // int c = rsmd.getColumnCount();
+  // List<String> cols = new ArrayList<String>();
+  // for (int x = 1; x <= c; x++) {
+  // String cname = rsmd.getColumnName(x);
+  // cols.add(cname);
+  // }
+  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
+  // System.out.println(header);
+  // return cols;
+  // }
   
   private static ArrayList<HashMap<String,String>> sqlComplexQuery1(
       Connection con) throws Exception {
@@ -579,41 +854,9 @@ public class SQLtoSolr {
     return createDocs(querySolr(params));
   }
   
-  private static Integer sqlCount(Connection con) throws Exception {
-    String query = "SELECT COUNT(*) FROM stocks WHERE stock_symbol = 'QRR'";
-    ResultSet rs = querySql(query);
-    rs.next();
-    System.out.println("===========================");
-    System.out.println("Start SQL Results");
-    System.out.println("===========================");
-    System.out.println("QRR Count : " + String.valueOf(rs.getInt(1)));
-    System.out.println("===========================");
-    System.out.println("End SQL Results");
-    System.out.println("===========================");
-    return rs.getInt(1);
-  }
-  
-  private static Integer solrCount() throws Exception {
-    ModifiableSolrParams params = new ModifiableSolrParams();
-    params.set("q", "stock_symbol:QRR");
-    QueryResponse qr = querySolr(params);
-    System.out.println("===========================");
-    System.out.println("Start Solr Results");
-    System.out.println("===========================");
-    System.out.println("QRR Count : "
-        + String.valueOf(qr.getResults().getNumFound()));
-    System.out.println("===========================");
-    System.out.println("End Solr Results");
-    System.out.println("===========================");
-    return (int) qr.getResults().getNumFound();
-  }
-  
-  private static void solrRange() throws Exception {
-    ModifiableSolrParams params = new ModifiableSolrParams();
-    params.set("indent", "true");
-    params.set("q", "+stock_price_open:[2.38 TO 2.64} +stock_symbol:QTM");
-    
-    // printSolrResults(querySolr(params));
+  @Test
+  public void testPriceOpenAgg() throws Exception {
+    stockPriceOpenAgg();
   }
   
   private static void stockPriceOpenAgg() throws Exception {
@@ -622,6 +865,47 @@ public class SQLtoSolr {
     params.set("stats.field", "stock_price_open");
     params.set("indent", "true");
     params.set("q", "*:*");
+    
+    // printSolrResults(querySolr(params));
+  }
+  
+  @Test
+  public void testStockPriceRange() throws Exception {
+    solrRange();
+  }
+  
+  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
+  // cols)
+  // throws Exception {
+  // SolrInputDocument solrInputDocument = new SolrInputDocument();
+  // String str = "";
+  // for (String col : cols) {
+  // col = col.toLowerCase();
+  // Object obj = rs.getObject(col);
+  // str += " | " + obj;
+  // solrInputDocument.addField(col, obj);
+  // }
+  // System.out.println(str);
+  // return solrInputDocument;
+  // }
+  
+  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
+  // ResultSetMetaData rsmd = rs.getMetaData();
+  // int c = rsmd.getColumnCount();
+  // List<String> cols = new ArrayList<String>();
+  // for (int x = 1; x <= c; x++) {
+  // String cname = rsmd.getColumnName(x);
+  // cols.add(cname);
+  // }
+  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
+  // System.out.println(header);
+  // return cols;
+  // }
+  
+  private static void solrRange() throws Exception {
+    ModifiableSolrParams params = new ModifiableSolrParams();
+    params.set("indent", "true");
+    params.set("q", "+stock_price_open:[2.38 TO 2.64} +stock_symbol:QTM");
     
     // printSolrResults(querySolr(params));
   }
@@ -636,64 +920,6 @@ public class SQLtoSolr {
       double maxvol = rs1.getDouble(1);
       System.out.println(maxvol);
     }
-  }
-  
-  private static void sqlSum(Connection con) throws Exception {
-    String s1 = "SELECT SUM(stock_volume) FROM stocks WHERE stock_symbol = ?";
-    System.out.println(s1);
-    PreparedStatement ps1 = con.prepareStatement(s1);
-    ps1.setString(1, "QTM");
-    ResultSet rs1 = ps1.executeQuery();
-    if (rs1.next()) {
-      long maxvol = rs1.getLong(1);
-      System.out.println(maxvol);
-    }
-  }
-  
-  private static void sqlMin(Connection con) throws Exception {
-    String s1 = "SELECT MIN(stock_volume) FROM stocks WHERE stock_symbol = ?";
-    System.out.println(s1);
-    PreparedStatement ps1 = con.prepareStatement(s1);
-    ps1.setString(1, "QTM");
-    ResultSet rs1 = ps1.executeQuery();
-    if (rs1.next()) {
-      long maxvol = rs1.getLong(1);
-      System.out.println(maxvol);
-    }
-  }
-  
-  private static long sqlMax(Connection con) throws Exception {
-    String query = "SELECT MAX(stock_volume) FROM stocks";
-    ResultSet rs = querySql(query);
-    rs.next();
-    System.out.println("===========================");
-    System.out.println("Start SQL Results");
-    System.out.println("===========================");
-    System.out.println("Max Stock Volume Count : "
-        + String.valueOf(rs.getLong(1)));
-    System.out.println("===========================");
-    System.out.println("End SQL Results");
-    System.out.println("===========================");
-    return rs.getLong(1);
-  }
-  
-  private static long solrMax() throws Exception {
-    ModifiableSolrParams params = new ModifiableSolrParams();
-    params.set("q", "*:*");
-    params.set("sort", "stock_volume desc");
-    params.set("rows", "1");
-    params.set("fl", "stock_volume");
-    QueryResponse qr = querySolr(params);
-    System.out.println("===========================");
-    System.out.println("Start Solr Results");
-    System.out.println("===========================");
-    System.out.println("Max Stock Volume Count : "
-        + String.valueOf(qr.getFacetField("stock_volume").getValues().get(0)
-            .getCount()));
-    System.out.println("===========================");
-    System.out.println("End Solr Results");
-    System.out.println("===========================");
-    return qr.getFacetField("stock_volume").getValues().get(0).getCount();
   }
   
   private static void sqlOrderby(Connection con) throws Exception {
