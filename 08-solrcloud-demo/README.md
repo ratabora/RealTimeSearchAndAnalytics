@@ -1,6 +1,20 @@
-==== Setting up Single Node Pseudo Distributed SolrCloud
+Real Time Search and Analytics on Big Data - Solr Cloud
+=============
 
-A PseudoDistributed SorlCloud cluster mimics the behavior of a multi-node SolrCloud cluster on a single node. This is a great way to test SolrCloud features with minimal effort. It is not recommended to use this type of setup in any type of production environment since any distributed fail safes are lost when the \'cluster\' is working off of a single node.
+Introduction
+-------
+This exercise will guide you through setting up Solr Cloud. This exercise is intended to be run on the student's local environment.
+
+Prerequisites
+-------
+* Linux based environment or Mac OS X. For Windows users you can use Cygwin.
+
+Setting Up Pseudo Distributed Solr Cloud
+-------
+
+A PseudoDistributed SorlCloud cluster mimics the behavior of a multi-node SolrCloud cluster on a single node. This is a great way to test SolrCloud features with minimal effort. It is not recommended to use this type of setup in any type of production environment since any distributed fail safes are lost when the 'cluster' is working off of a single node.
+
+### Creating Your First Shards
 
 We will use the same Solr download that we used in Exercise 3. Navigate to that directory.
 
@@ -19,7 +33,7 @@ LICENSE.txt	README.txt	dist		example		shard1core1	testing-example
 $ rm -rf shard1core1/solr/collection1/data
 $ rm -rf shard2core1/solr/collection1/data
 
-We can now start the first shard of our collection. This instance will run an embedded Zookeeper process that the pseudo-distributed cluster will use for coordination and configuration. Remember, this type of setup is not recommended for production but it works for our testing purposes. As the shard comes online, Solr will pick up the configuration files from the shard/solr/conf directory and upload them to the embedded Zookeeper process. We will name this configuration exampleConf so that when we start the other shards we can reuse the same configuration. We will also set the number of shards we intend to split this collection into. This parameter is very important because as of the current version of Apache Solr, you cannot change this number without reindexing your entire collection.
+We can now start the first shard of our collection. This instance will run an embedded Zookeeper process that the pseudo-distributed cluster will use for coordination and configuration. As the shard comes online, Solr will pick up the configuration files from the shard/solr/conf directory and upload them to the embedded Zookeeper process. We will name this configuration exampleConf so that when we start the other shards we can reuse the same configuration. We will also set the number of shards we intend to split this collection into. This parameter is very important because as of the current version of Apache Solr, you cannot change this number without reindexing your entire collection.
 
 	$ cd shard1core1/
 	$ java -Dbootstrap_confdir=./solr/collection1/conf -Dcollection.configName=exampleConf -DzkRun -DnumShards=2 -jar start.jar
@@ -58,7 +72,7 @@ Let's start the second shard on a different port on our machine. Open up a new t
 	$ cd ../shard2core1/
 	$ java -Djetty.port=7574 -DzkHost=localhost:9983 -jar start.jar
 
-The log output should look similar to the logs coming from the first shard startup.
+The log output should look similar to the logs coming from the first shard startup. 
 
 	INFO: A cluster state change has occurred - updating...
 	Feb 18, 2013 11:41:19 AM org.apache.solr.core.CoreContainer register
@@ -103,7 +117,32 @@ The log output should look similar to the logs coming from the first shard start
 	Feb 18, 2013 11:41:20 AM org.apache.solr.common.cloud.ZkStateReader$2 process
 	INFO: A cluster state change has occurred - updating...
 
-If we check the Web UI again we can see the new shard is included in our collection. We can also see that shard1 is located at host:8983 and shard2 is located at host:7574. You should also note that you can view the Solr Web UI through the new shard as well and see the same information http://localhost:7574/solr/#/~cloud.
+Looking through the logs you can see the steps the core takes while it is starting up. First it registers the core as the second shard of collection1:
+
+		INFO: Register shard - core:collection1 address:http://Ryan-Taboras-MacBook-Air.local:7574/solr shardId:shard2
+
+Then you can see it go through the Leader election process to determine that it is a Leader core:
+
+	Feb 18, 2013 11:41:19 AM org.apache.solr.cloud.SyncStrategy syncToMe
+		INFO: http://Ryan-Taboras-MacBook-Air.local:7574/solr/collection1/ has no replicas
+		Feb 18, 2013 11:41:19 AM org.apache.solr.cloud.ShardLeaderElectionContext runLeaderProcess
+		INFO: I am the new leader: http://Ryan-Taboras-MacBook-Air.local:7574/solr/collection1/
+
+Finally, it finishes by updating Zookeeper with its status.
+
+	Feb 18, 2013 11:41:20 AM org.apache.solr.common.cloud.ZkStateReader updateClusterState
+		INFO: Updating cloud state from ZooKeeper... 
+		Feb 18, 2013 11:41:20 AM org.apache.solr.servlet.SolrDispatchFilter init
+		INFO: user.dir=/Users/ryantabora/Code/ryantabora/RealTimeSearchAndAnalytics/03-installing-solr/apache-solr-4.0.0/shard2core1
+		Feb 18, 2013 11:41:20 AM org.apache.solr.servlet.SolrDispatchFilter init
+		INFO: SolrDispatchFilter.init() done
+		2013-02-18 11:41:20.079:INFO:oejs.AbstractConnector:Started SocketConnector@0.0.0.0:7574
+
+If we check the Web UI again we can see the new shard is included in our collection. We can also see that shard1 is located at host:8983 and shard2 is located at host:7574. You should also note that you can view the Solr Web UI through the new shard as well and see the same information 
+
+http://localhost:7574/solr/#/~cloud.
+
+### Querying Documents in the SolrCloud
 
 Now that we have both shards up we can start indexing documents to the SolrCloud. First navigate to the exampledocs directory of the first shard and execute the post.jar command.
 
@@ -394,4 +433,133 @@ http://localhost:7574/solr/collection1/select?q=*:*
 
 At this point, if we lost one of our shards we would still lose all of the data that was indexed on that shard. To help prevent this we can use replicas to serve as hot failovers for our shards.
 
-First we should make copies of the shard1 and shard2 directories, these directories will hold all of the data for our new replicas.
+### Starting Replica Cores
+
+To create a replica core we simply make copies of the shard1core1 and shard2core1 directories. These copied directories will hold all of the data for our new Replica cores.
+
+	$ cd ../../
+	$ ls
+	CHANGES.txt	LICENSE.txt	NOTICE.txt	README.txt	contrib		dist		docs		example		licenses	shard1core1	shard2core1	testing-example
+	$ cp -r shard1core1 shard1core2
+	$ cp -r shard2core1 shard2core2
+	$ ls
+	CHANGES.txt	LICENSE.txt	NOTICE.txt	README.txt	contrib		dist		docs		example		licenses	shard1core1	shard1core2	shard2core1	shard2core2	testing-example
+
+Now start each of these cores in a new terminal window.
+
+	$ cd shard1core2
+	$ java -Djetty.port=8900 -DzkHost=localhost:9983 -jar start.jar
+
+You will see logs similar to the following:
+
+	INFO: A cluster state change has occurred - updating...
+	Feb 18, 2013 2:00:40 PM org.apache.solr.update.PeerSync handleVersions
+	INFO: PeerSync: core=collection1 url=http://Ryan-Taboras-MacBook-Air.local:8900/solr  Received 14 versions from Ryan-Taboras-MacBook-Air.local:8983/solr/collection1/
+	Feb 18, 2013 2:00:40 PM org.apache.solr.update.PeerSync handleVersions
+	INFO: PeerSync: core=collection1 url=http://Ryan-Taboras-MacBook-Air.local:8900/solr  Our versions are newer. ourLowThreshold=1427339449990119424 otherHigh=1427339450035208192
+	Feb 18, 2013 2:00:40 PM org.apache.solr.update.PeerSync sync
+	INFO: PeerSync: core=collection1 url=http://Ryan-Taboras-MacBook-Air.local:8900/solr DONE. sync succeeded
+	Feb 18, 2013 2:00:40 PM org.apache.solr.update.DirectUpdateHandler2 commit
+	INFO: start commit{flags=0,_version_=0,optimize=false,openSearcher=true,waitSearcher=true,expungeDeletes=false,softCommit=false}
+	Feb 18, 2013 2:00:40 PM org.apache.solr.core.SolrDeletionPolicy onInit
+	INFO: SolrDeletionPolicy.onInit: commits:num=1
+		commit{dir=NRTCachingDirectory(org.apache.lucene.store.NIOFSDirectory@/Users/ryantabora/Code/ryantabora/RealTimeSearchAndAnalytics/03-installing-solr/apache-solr-4.0.0/shard1core2/solr/collection1/data/index lockFactory=org.apache.lucene.store.NativeFSLockFactory@381bd13; maxCacheMB=48.0 maxMergeSizeMB=4.0),segFN=segments_2,generation=2,filenames=[_0_Lucene40_0.tim, _0.fnm, _0.tvd, _0.tvf, _0_nrm.cfs, _0_Lucene40_0.prx, _0_Lucene40_0.tip, _0_Lucene40_0.frq, _0.tvx, _0_nrm.cfe, segments_2, _0.fdx, _0.si, _0.fdt]
+	Feb 18, 2013 2:00:40 PM org.apache.solr.core.SolrDeletionPolicy updateCommits
+	INFO: newest commit = 2
+	Feb 18, 2013 2:00:40 PM org.apache.solr.search.SolrIndexSearcher <init>
+	INFO: Opening Searcher@fe14de0 main
+	Feb 18, 2013 2:00:40 PM org.apache.solr.update.DirectUpdateHandler2 commit
+	INFO: end_commit_flush
+	Feb 18, 2013 2:00:40 PM org.apache.solr.core.QuerySenderListener newSearcher
+	INFO: QuerySenderListener sending requests to Searcher@fe14de0 main{StandardDirectoryReader(segments_2:3 _0(4.0.0.2):C14)}
+	Feb 18, 2013 2:00:40 PM org.apache.solr.core.QuerySenderListener newSearcher
+	INFO: QuerySenderListener done.
+	Feb 18, 2013 2:00:40 PM org.apache.solr.core.SolrCore registerSearcher
+	INFO: [collection1] Registered new searcher Searcher@fe14de0 main{StandardDirectoryReader(segments_2:3 _0(4.0.0.2):C14)}
+	Feb 18, 2013 2:00:40 PM org.apache.solr.cloud.RecoveryStrategy doRecovery
+	INFO: PeerSync Recovery was successful - registering as Active. core=collection1
+	Feb 18, 2013 2:00:40 PM org.apache.solr.common.cloud.ZkStateReader$2 process
+	INFO: A cluster state change has occurred - updating...
+
+And in another terminal window
+
+	$ cd shard2core2
+	$ java -Djetty.port=7500 -DzkHost=localhost:9983 -jar start.jar
+
+See the logs:
+
+	INFO: A cluster state change has occurred - updating...
+	Feb 18, 2013 2:02:22 PM org.apache.solr.update.PeerSync handleVersions
+	INFO: PeerSync: core=collection1 url=http://Ryan-Taboras-MacBook-Air.local:7500/solr  Received 18 versions from Ryan-Taboras-MacBook-Air.local:7574/solr/collection1/
+	Feb 18, 2013 2:02:22 PM org.apache.solr.update.PeerSync handleVersions
+	INFO: PeerSync: core=collection1 url=http://Ryan-Taboras-MacBook-Air.local:7500/solr  Our versions are newer. ourLowThreshold=1427339450007945216 otherHigh=1427339450087636992
+	Feb 18, 2013 2:02:22 PM org.apache.solr.update.PeerSync sync
+	INFO: PeerSync: core=collection1 url=http://Ryan-Taboras-MacBook-Air.local:7500/solr DONE. sync succeeded
+	Feb 18, 2013 2:02:22 PM org.apache.solr.update.DirectUpdateHandler2 commit
+	INFO: start commit{flags=0,_version_=0,optimize=false,openSearcher=true,waitSearcher=true,expungeDeletes=false,softCommit=false}
+	Feb 18, 2013 2:02:22 PM org.apache.solr.core.SolrDeletionPolicy onInit
+	INFO: SolrDeletionPolicy.onInit: commits:num=1
+		commit{dir=NRTCachingDirectory(org.apache.lucene.store.NIOFSDirectory@/Users/ryantabora/Code/ryantabora/RealTimeSearchAndAnalytics/03-installing-solr/apache-solr-4.0.0/shard2core2/solr/collection1/data/index lockFactory=org.apache.lucene.store.NativeFSLockFactory@5a10c276; maxCacheMB=48.0 maxMergeSizeMB=4.0),segFN=segments_2,generation=2,filenames=[_0_Lucene40_0.tim, _0.fnm, _0.tvd, _0.tvf, _0_nrm.cfs, _0_Lucene40_0.prx, _0_Lucene40_0.tip, _0_Lucene40_0.frq, _0.tvx, _0_nrm.cfe, segments_2, _0.fdx, _0.si, _0.fdt]
+	Feb 18, 2013 2:02:22 PM org.apache.solr.core.SolrDeletionPolicy updateCommits
+	INFO: newest commit = 2
+	Feb 18, 2013 2:02:22 PM org.apache.solr.search.SolrIndexSearcher <init>
+	INFO: Opening Searcher@2d2ce574 main
+	Feb 18, 2013 2:02:22 PM org.apache.solr.update.DirectUpdateHandler2 commit
+	INFO: end_commit_flush
+	Feb 18, 2013 2:02:22 PM org.apache.solr.core.QuerySenderListener newSearcher
+	INFO: QuerySenderListener sending requests to Searcher@2d2ce574 main{StandardDirectoryReader(segments_2:3 _0(4.0.0.2):C18)}
+	Feb 18, 2013 2:02:22 PM org.apache.solr.core.QuerySenderListener newSearcher
+	INFO: QuerySenderListener done.
+	Feb 18, 2013 2:02:22 PM org.apache.solr.core.SolrCore registerSearcher
+	INFO: [collection1] Registered new searcher Searcher@2d2ce574 main{StandardDirectoryReader(segments_2:3 _0(4.0.0.2):C18)}
+	Feb 18, 2013 2:02:22 PM org.apache.solr.cloud.RecoveryStrategy doRecovery
+	INFO: PeerSync Recovery was successful - registering as Active. core=collection1
+	Feb 18, 2013 2:02:22 PM org.apache.solr.common.cloud.ZkStateReader$2 process
+	INFO: A cluster state change has occurred - updating...
+
+As you can see neither of the two new replica cores determine that they are Leader cores. By communicating with Zookeeper, these cores can determine that the Leader of their shard is already up and running.
+
+We can now query any of these cores and view the same results.
+
+http://localhost:8983/solr/collection1/select?q=id:6H500F0
+http://localhost:8900/solr/collection1/select?q=id:6H500F0
+http://localhost:7574/solr/collection1/select?q=id:6H500F0
+http://localhost:7500/solr/collection1/select?q=id:6H500F0
+
+	<response>
+		<lst name="responseHeader">
+			<int name="status">0</int>
+			<int name="QTime">15</int>
+			<lst name="params">
+				<str name="q">id:6H500F0</str>
+			</lst>
+		</lst>
+		<result name="response" numFound="1" start="0" maxScore="3.1972246">
+			<doc>
+				<str name="id">6H500F0</str>
+				<str name="name">
+					Maxtor DiamondMax 11 - hard drive - 500 GB - SATA-300
+				</str>
+				<str name="manu">Maxtor Corp.</str>
+				<str name="manu_id_s">maxtor</str>
+				<arr name="cat">
+					<str>electronics</str>
+					<str>hard drive</str>
+				</arr>
+				<arr name="features">
+					<str>SATA 3.0Gb/s, NCQ</str>
+					<str>8.5ms seek</str>
+					<str>16MB cache</str>
+				</arr>
+				<float name="price">350.0</float>
+				<str name="price_c">350,USD</str>
+				<int name="popularity">6</int>
+				<bool name="inStock">true</bool>
+				<str name="store">45.17614,-93.87341</str>
+				<date name="manufacturedate_dt">2006-02-13T15:26:37Z</date>
+				<long name="_version_">1427339449949224960</long>
+			</doc>
+		</result>
+	</response>
+
+It is also interesting to view submit the same query to a single core over and over again. You will see Solr distribute the queries to the replica core if you ping a single server several times. Monitor a single core and query it several times.
