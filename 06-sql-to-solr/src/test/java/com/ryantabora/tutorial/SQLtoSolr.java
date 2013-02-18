@@ -35,15 +35,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-// TODO
-// get more data
-// facet + stats = groupby
-// add sort by = orderby
-// range queries
-// count
-// count + facet = group by
-// LIKE
-// 
 public class SQLtoSolr {
   
   /**
@@ -391,38 +382,130 @@ public class SQLtoSolr {
   
   @Test
   public void testMin() throws Exception {
-    sqlMin(con);
-    // TODO: Create Solr Comparison
+    System.out.println("***********Starting Min Test***********");
+    Assert.assertEquals(sqlMin(con), solrMin());
+    System.out.println("***********End Min Test***********");
   }
   
-  private static void sqlMin(Connection con) throws Exception {
-    String s1 = "SELECT MIN(stock_volume) FROM stocks WHERE stock_symbol = ?";
-    System.out.println(s1);
-    PreparedStatement ps1 = con.prepareStatement(s1);
-    ps1.setString(1, "QTM");
-    ResultSet rs1 = ps1.executeQuery();
-    if (rs1.next()) {
-      long maxvol = rs1.getLong(1);
-      System.out.println(maxvol);
-    }
+  private static long sqlMin(Connection con) throws Exception {
+    String query = "SELECT MIN(stock_volume) FROM stocks";
+    ResultSet rs = querySql(query);
+    rs.next();
+    System.out.println("===========================");
+    System.out.println("Start SQL Results");
+    System.out.println("===========================");
+    System.out.println("Min Stock Volume Count : "
+        + String.valueOf(rs.getLong(1)));
+    System.out.println("===========================");
+    System.out.println("End SQL Results");
+    System.out.println("===========================");
+    return rs.getLong(1);
+  }
+  
+  private static long solrMin() throws Exception {
+    ModifiableSolrParams params = new ModifiableSolrParams();
+    params.set("q", "*:*");
+    params.set("sort", "stock_volume asc");
+    params.set("rows", "1");
+    params.set("fl", "stock_volume");
+    QueryResponse qr = querySolr(params);
+    System.out.println("===========================");
+    System.out.println("Start Solr Results");
+    System.out.println("===========================");
+    long maxVolume = (Long.valueOf(qr.getResults().get(0)
+        .getFieldValue("stock_volume").toString()));
+    System.out.println("Min Stock Volume Count : " + maxVolume);
+    System.out.println("===========================");
+    System.out.println("End Solr Results");
+    System.out.println("===========================");
+    return maxVolume;
   }
   
   @Test
   public void testSum() throws Exception {
-    sqlSum(con);
-    // TODO: Create Solr Comparison
+    System.out.println("***********Starting Sum Test***********");
+    Assert.assertEquals(sqlSum(con), solrSum());
+    System.out.println("***********End Sum Test***********");
   }
   
-  private static void sqlSum(Connection con) throws Exception {
-    String s1 = "SELECT SUM(stock_volume) FROM stocks WHERE stock_symbol = ?";
-    System.out.println(s1);
-    PreparedStatement ps1 = con.prepareStatement(s1);
-    ps1.setString(1, "QTM");
-    ResultSet rs1 = ps1.executeQuery();
-    if (rs1.next()) {
-      long maxvol = rs1.getLong(1);
-      System.out.println(maxvol);
-    }
+  private static long sqlSum(Connection con) throws Exception {
+    String query = "SELECT SUM(stock_volume) FROM stocks";
+    ResultSet rs = querySql(query);
+    rs.next();
+    long sumVol = rs.getLong(1);
+    System.out.println("===========================");
+    System.out.println("Start SQL Results");
+    System.out.println("===========================");
+    System.out.println("Sum Stock Volume Count : " + String.valueOf(sumVol));
+    System.out.println("===========================");
+    System.out.println("End SQL Results");
+    System.out.println("===========================");
+    return sumVol;
+  }
+  
+  private static long solrSum() throws Exception {
+    ModifiableSolrParams params = new ModifiableSolrParams();
+    params.set("q", "*:*");
+    params.set("stats", "true");
+    params.set("stats.field", "stock_volume");
+    String jsonResults = querySolrJson(params);
+    JSONObject json = (JSONObject) JSONSerializer
+        .toJSON(jsonResults.toString());
+    Double sum = (Double) json.getJSONObject("stats")
+        .getJSONObject("stats_fields").getJSONObject("stock_volume").get("sum");
+    System.out.println("===========================");
+    System.out.println("Start Solr Results");
+    System.out.println("===========================");
+    System.out.println("Sum Stock Volume Count : " + String.valueOf(sum));
+    System.out.println("===========================");
+    System.out.println("End Solr Results");
+    System.out.println("===========================");
+    return sum.longValue();
+  }
+  
+  @Test
+  public void testAverage() throws Exception {
+    System.out.println("***********Starting Average Test***********");
+    Assert.assertEquals(sqlAverage(con), solrAverage());
+    System.out.println("***********End Average Test***********");
+  }
+  
+  private static long sqlAverage(Connection con) throws Exception {
+    String query = "SELECT AVG(stock_volume) FROM stocks";
+    ResultSet rs = querySql(query);
+    rs.next();
+    long aveVol = rs.getLong(1);
+    System.out.println("===========================");
+    System.out.println("Start SQL Results");
+    System.out.println("===========================");
+    System.out
+        .println("Average Stock Volume Count : " + String.valueOf(aveVol));
+    System.out.println("===========================");
+    System.out.println("End SQL Results");
+    System.out.println("===========================");
+    return aveVol;
+  }
+  
+  private static long solrAverage() throws Exception {
+    ModifiableSolrParams params = new ModifiableSolrParams();
+    params.set("q", "*:*");
+    params.set("stats", "true");
+    params.set("stats.field", "stock_volume");
+    String jsonResults = querySolrJson(params);
+    JSONObject json = (JSONObject) JSONSerializer
+        .toJSON(jsonResults.toString());
+    Double aveVol = (Double) json.getJSONObject("stats")
+        .getJSONObject("stats_fields").getJSONObject("stock_volume")
+        .get("mean");
+    System.out.println("===========================");
+    System.out.println("Start Solr Results");
+    System.out.println("===========================");
+    System.out
+        .println("Average Stock Volume Count : " + String.valueOf(aveVol));
+    System.out.println("===========================");
+    System.out.println("End Solr Results");
+    System.out.println("===========================");
+    return aveVol.longValue();
   }
   
   @Test
@@ -624,71 +707,64 @@ public class SQLtoSolr {
   }
   
   @Test
-  public void testPriceOpenAgg() throws Exception {
-    stockPriceOpenAgg();
+  public void testLike() throws Exception {
+    System.out.println("***********Starting Like Test***********");
+    Assert.assertEquals(sqlLike(con), solrLike());
+    System.out.println("***********End Like Test***********");
   }
   
-  private static void stockPriceOpenAgg() throws Exception {
+  private static ArrayList<HashMap<String,String>> sqlLike(Connection con)
+      throws Exception {
+    String query = "SELECT * FROM stocks " + "WHERE stock_symbol LIKE 'QR%'";
+    return createDocs(querySql(query));
+  }
+  
+  private static ArrayList<HashMap<String,String>> solrLike() throws Exception {
     ModifiableSolrParams params = new ModifiableSolrParams();
-    params.set("stats", "true");
-    params.set("stats.field", "stock_price_open");
-    params.set("indent", "true");
-    params.set("q", "*:*");
-    
-    // printSolrResults(querySolr(params));
+    params.set("q", "stock_symbol:QR*");
+    params.set("rows", "100");
+    return createDocs(querySolr(params));
   }
   
   @Test
-  public void testStockPriceRange() throws Exception {
-    solrRange();
+  public void testUpdate() throws Exception {
+    System.out.println("***********Starting Update Test***********");
+    Assert.assertEquals(sqlUpdate(con), solrUpdate());
+    System.out.println("***********End Update Test***********");
   }
   
-  private static void solrRange() throws Exception {
-    ModifiableSolrParams params = new ModifiableSolrParams();
-    params.set("indent", "true");
-    params.set("q", "+stock_price_open:[2.38 TO 2.64} +stock_symbol:QTM");
-    
-    // printSolrResults(querySolr(params));
-  }
-  
-  private static void sqlAverage(Connection con) throws Exception {
-    String s1 = "SELECT AVG(stock_volume) FROM stocks WHERE stock_symbol = ?";
-    System.out.println(s1);
-    PreparedStatement ps1 = con.prepareStatement(s1);
-    ps1.setString(1, "QTM");
-    ResultSet rs1 = ps1.executeQuery();
-    if (rs1.next()) {
-      double maxvol = rs1.getDouble(1);
-      System.out.println(maxvol);
-    }
-  }
-  
-  private static void sqlOrderby(Connection con) throws Exception {
-    String query = "SELECT * FROM stocks ORDER BY stock_volume ASC";
-    System.out.println(query);
-    PreparedStatement ps = con.prepareStatement(query);
-    ResultSet rs = ps.executeQuery();
-    while (rs.next()) {
-      // printSQLResult(rs1);
-    }
-  }
-  
-  private static void sqlLike(Connection con) throws Exception {
-    String s1 = "SELECT * FROM stocks " + "WHERE stock_symbol LIKE 'Q%'";
-    System.out.println(s1);
-    PreparedStatement ps1 = con.prepareStatement(s1);
-    ResultSet rs1 = ps1.executeQuery();
-    while (rs1.next()) {
-      // printSQLResult(rs1);
-    }
-  }
-  
-  private static void sqlUpdate(Connection con) throws Exception {
-    String s1 = "UPDATE stocks SET stock_volume = ? WHERE stock_symbol = 'QRR' AND ddate = ?";
-    System.out.println(s1);
-    PreparedStatement ps1 = con.prepareStatement(s1);
-    java.util.Date date = dateFormat.parse("2007-02-26");
-    ps1.setDate(1, new java.sql.Date(date.getTime()));
+  private static ArrayList<HashMap<String,String>> sqlUpdate(Connection con)
+      throws Exception {
+    String updateQuery = "UPDATE stocks SET stock_volume = ? WHERE stock_symbol = 'QRR'";
+    System.out.println(updateQuery);
+    PreparedStatement ps1 = con.prepareStatement(updateQuery);
+    ps1.setInt(1, 20130227);
     ps1.executeUpdate();
+    
+    String verifyQuery = "SELECT * FROM stocks WHERE stock_symbol = 'QRR'";
+    return createDocs(querySql(verifyQuery));
+  }
+  
+  private static ArrayList<HashMap<String,String>> solrUpdate()
+      throws Exception {
+    ModifiableSolrParams params = new ModifiableSolrParams();
+    params.set("q", "stock_symbol:QRR");
+    params.set("rows", "100");
+    int val = 20130227;
+    QueryResponse qr = querySolr(params);
+    ArrayList<SolrInputDocument> inputDocs = new ArrayList<SolrInputDocument>();
+    for (SolrDocument doc : qr.getResults()) {
+      SolrInputDocument inputDoc = ClientUtils.toSolrInputDocument(doc);
+      inputDoc.setField("stock_volume", val);
+      inputDocs.add(inputDoc);
+    }
+    solrClient.add(inputDocs);
+    solrClient.commit();
+    
+    ModifiableSolrParams verifyParams = new ModifiableSolrParams();
+    verifyParams.set("q", "stock_symbol:QRR");
+    verifyParams.set("rows", "100");
+    
+    return createDocs(querySolr(verifyParams));
   }
 }
