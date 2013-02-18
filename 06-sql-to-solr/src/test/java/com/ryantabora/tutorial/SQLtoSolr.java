@@ -25,8 +25,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.solr.client.solrj.embedded.JettySolrRunner;
 import org.apache.solr.client.solrj.impl.HttpClientUtil;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
-import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
@@ -251,34 +249,6 @@ public class SQLtoSolr {
     return docs;
   }
   
-  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
-  // cols)
-  // throws Exception {
-  // SolrInputDocument solrInputDocument = new SolrInputDocument();
-  // String str = "";
-  // for (String col : cols) {
-  // col = col.toLowerCase();
-  // Object obj = rs.getObject(col);
-  // str += " | " + obj;
-  // solrInputDocument.addField(col, obj);
-  // }
-  // System.out.println(str);
-  // return solrInputDocument;
-  // }
-  
-  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
-  // ResultSetMetaData rsmd = rs.getMetaData();
-  // int c = rsmd.getColumnCount();
-  // List<String> cols = new ArrayList<String>();
-  // for (int x = 1; x <= c; x++) {
-  // String cname = rsmd.getColumnName(x);
-  // cols.add(cname);
-  // }
-  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
-  // System.out.println(header);
-  // return cols;
-  // }
-  
   /**
    * Performs the Solr query and returns the response
    * 
@@ -348,34 +318,6 @@ public class SQLtoSolr {
     Assert.assertEquals(sqlCount(con), solrCount());
     System.out.println("***********End Count Test***********");
   }
-  
-  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
-  // cols)
-  // throws Exception {
-  // SolrInputDocument solrInputDocument = new SolrInputDocument();
-  // String str = "";
-  // for (String col : cols) {
-  // col = col.toLowerCase();
-  // Object obj = rs.getObject(col);
-  // str += " | " + obj;
-  // solrInputDocument.addField(col, obj);
-  // }
-  // System.out.println(str);
-  // return solrInputDocument;
-  // }
-  
-  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
-  // ResultSetMetaData rsmd = rs.getMetaData();
-  // int c = rsmd.getColumnCount();
-  // List<String> cols = new ArrayList<String>();
-  // for (int x = 1; x <= c; x++) {
-  // String cname = rsmd.getColumnName(x);
-  // cols.add(cname);
-  // }
-  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
-  // System.out.println(header);
-  // return cols;
-  // }
   
   private static Integer sqlCount(Connection con) throws Exception {
     String query = "SELECT COUNT(*) FROM stocks WHERE stock_symbol = 'QRR'";
@@ -491,34 +433,6 @@ public class SQLtoSolr {
     
   }
   
-  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
-  // cols)
-  // throws Exception {
-  // SolrInputDocument solrInputDocument = new SolrInputDocument();
-  // String str = "";
-  // for (String col : cols) {
-  // col = col.toLowerCase();
-  // Object obj = rs.getObject(col);
-  // str += " | " + obj;
-  // solrInputDocument.addField(col, obj);
-  // }
-  // System.out.println(str);
-  // return solrInputDocument;
-  // }
-  
-  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
-  // ResultSetMetaData rsmd = rs.getMetaData();
-  // int c = rsmd.getColumnCount();
-  // List<String> cols = new ArrayList<String>();
-  // for (int x = 1; x <= c; x++) {
-  // String cname = rsmd.getColumnName(x);
-  // cols.add(cname);
-  // }
-  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
-  // System.out.println(header);
-  // return cols;
-  // }
-  
   /**
    * Create a Solr query that looks for a record where the stock price is null
    * 
@@ -550,34 +464,6 @@ public class SQLtoSolr {
         .toString());
     System.out.println("***********End Select Limit Test***********");
   }
-  
-  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
-  // cols)
-  // throws Exception {
-  // SolrInputDocument solrInputDocument = new SolrInputDocument();
-  // String str = "";
-  // for (String col : cols) {
-  // col = col.toLowerCase();
-  // Object obj = rs.getObject(col);
-  // str += " | " + obj;
-  // solrInputDocument.addField(col, obj);
-  // }
-  // System.out.println(str);
-  // return solrInputDocument;
-  // }
-  
-  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
-  // ResultSetMetaData rsmd = rs.getMetaData();
-  // int c = rsmd.getColumnCount();
-  // List<String> cols = new ArrayList<String>();
-  // for (int x = 1; x <= c; x++) {
-  // String cname = rsmd.getColumnName(x);
-  // cols.add(cname);
-  // }
-  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
-  // System.out.println(header);
-  // return cols;
-  // }
   
   private static ArrayList<HashMap<String,String>> solrSelectLimit()
       throws Exception {
@@ -612,34 +498,6 @@ public class SQLtoSolr {
     }
     System.out.println("***********End Group By Average Test***********");
   }
-  
-  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
-  // cols)
-  // throws Exception {
-  // SolrInputDocument solrInputDocument = new SolrInputDocument();
-  // String str = "";
-  // for (String col : cols) {
-  // col = col.toLowerCase();
-  // Object obj = rs.getObject(col);
-  // str += " | " + obj;
-  // solrInputDocument.addField(col, obj);
-  // }
-  // System.out.println(str);
-  // return solrInputDocument;
-  // }
-  
-  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
-  // ResultSetMetaData rsmd = rs.getMetaData();
-  // int c = rsmd.getColumnCount();
-  // List<String> cols = new ArrayList<String>();
-  // for (int x = 1; x <= c; x++) {
-  // String cname = rsmd.getColumnName(x);
-  // cols.add(cname);
-  // }
-  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
-  // System.out.println(header);
-  // return cols;
-  // }
   
   private static ArrayList<HashMap<String,String>> solrStockPriceGroupByAvg()
       throws Exception {
@@ -702,34 +560,6 @@ public class SQLtoSolr {
     System.out.println("***********End Price Range Test***********");
   }
   
-  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
-  // cols)
-  // throws Exception {
-  // SolrInputDocument solrInputDocument = new SolrInputDocument();
-  // String str = "";
-  // for (String col : cols) {
-  // col = col.toLowerCase();
-  // Object obj = rs.getObject(col);
-  // str += " | " + obj;
-  // solrInputDocument.addField(col, obj);
-  // }
-  // System.out.println(str);
-  // return solrInputDocument;
-  // }
-  
-  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
-  // ResultSetMetaData rsmd = rs.getMetaData();
-  // int c = rsmd.getColumnCount();
-  // List<String> cols = new ArrayList<String>();
-  // for (int x = 1; x <= c; x++) {
-  // String cname = rsmd.getColumnName(x);
-  // cols.add(cname);
-  // }
-  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
-  // System.out.println(header);
-  // return cols;
-  // }
-  
   private static ArrayList<HashMap<String,String>> solrStockPriceRange()
       throws Exception {
     ModifiableSolrParams params = new ModifiableSolrParams();
@@ -742,11 +572,6 @@ public class SQLtoSolr {
     String query = "SELECT * FROM stocks "
         + "WHERE stock_symbol = 'QTM' AND (stock_price_open <= 2.64 AND stock_price_open >= 2.38)";
     return createDocs(querySql(query));
-    // PreparedStatement ps1 = con.prepareStatement(s1);
-    // ResultSet rs1 = ps1.executeQuery();
-    // while (rs1.next()) {
-    // // printSQLResult(rs1);
-    // }
   }
   
   @Test
@@ -755,34 +580,6 @@ public class SQLtoSolr {
     Assert.assertEquals(sqlStockSort(con), solrStockSort());
     System.out.println("***********End Sort Test***********");
   }
-  
-  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
-  // cols)
-  // throws Exception {
-  // SolrInputDocument solrInputDocument = new SolrInputDocument();
-  // String str = "";
-  // for (String col : cols) {
-  // col = col.toLowerCase();
-  // Object obj = rs.getObject(col);
-  // str += " | " + obj;
-  // solrInputDocument.addField(col, obj);
-  // }
-  // System.out.println(str);
-  // return solrInputDocument;
-  // }
-  
-  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
-  // ResultSetMetaData rsmd = rs.getMetaData();
-  // int c = rsmd.getColumnCount();
-  // List<String> cols = new ArrayList<String>();
-  // for (int x = 1; x <= c; x++) {
-  // String cname = rsmd.getColumnName(x);
-  // cols.add(cname);
-  // }
-  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
-  // System.out.println(header);
-  // return cols;
-  // }
   
   private static ArrayList<HashMap<String,String>> solrStockSort()
       throws Exception {
@@ -802,40 +599,12 @@ public class SQLtoSolr {
   @Test
   public void testComplexQuery() throws Exception {
     System.out.println("***********Starting Complex Test***********");
-    Assert.assertEquals(sqlComplexQuery1(con), solrComplexQuery1());
+    Assert.assertEquals(sqlComplexQuery(con), solrComplexQuery());
     System.out.println("***********End Complex Test***********");
     
   }
   
-  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
-  // cols)
-  // throws Exception {
-  // SolrInputDocument solrInputDocument = new SolrInputDocument();
-  // String str = "";
-  // for (String col : cols) {
-  // col = col.toLowerCase();
-  // Object obj = rs.getObject(col);
-  // str += " | " + obj;
-  // solrInputDocument.addField(col, obj);
-  // }
-  // System.out.println(str);
-  // return solrInputDocument;
-  // }
-  
-  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
-  // ResultSetMetaData rsmd = rs.getMetaData();
-  // int c = rsmd.getColumnCount();
-  // List<String> cols = new ArrayList<String>();
-  // for (int x = 1; x <= c; x++) {
-  // String cname = rsmd.getColumnName(x);
-  // cols.add(cname);
-  // }
-  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
-  // System.out.println(header);
-  // return cols;
-  // }
-  
-  private static ArrayList<HashMap<String,String>> sqlComplexQuery1(
+  private static ArrayList<HashMap<String,String>> sqlComplexQuery(
       Connection con) throws Exception {
     String query = "SELECT * FROM stocks "
         + "WHERE (stock_symbol = 'QTM' AND stock_price_open > 2.57)"
@@ -844,7 +613,7 @@ public class SQLtoSolr {
     return createDocs(querySql(query));
   }
   
-  private static ArrayList<HashMap<String,String>> solrComplexQuery1()
+  private static ArrayList<HashMap<String,String>> solrComplexQuery()
       throws Exception {
     ModifiableSolrParams params = new ModifiableSolrParams();
     params.set("indent", "true");
@@ -873,34 +642,6 @@ public class SQLtoSolr {
   public void testStockPriceRange() throws Exception {
     solrRange();
   }
-  
-  // private static SolrInputDocument createSolrDoc(ResultSet rs, List<String>
-  // cols)
-  // throws Exception {
-  // SolrInputDocument solrInputDocument = new SolrInputDocument();
-  // String str = "";
-  // for (String col : cols) {
-  // col = col.toLowerCase();
-  // Object obj = rs.getObject(col);
-  // str += " | " + obj;
-  // solrInputDocument.addField(col, obj);
-  // }
-  // System.out.println(str);
-  // return solrInputDocument;
-  // }
-  
-  // private static List<String> printRowMeta(ResultSet rs) throws Exception {
-  // ResultSetMetaData rsmd = rs.getMetaData();
-  // int c = rsmd.getColumnCount();
-  // List<String> cols = new ArrayList<String>();
-  // for (int x = 1; x <= c; x++) {
-  // String cname = rsmd.getColumnName(x);
-  // cols.add(cname);
-  // }
-  // String header = "| " + StringUtil.concatEntries(cols, " | ", " | ");
-  // System.out.println(header);
-  // return cols;
-  // }
   
   private static void solrRange() throws Exception {
     ModifiableSolrParams params = new ModifiableSolrParams();
