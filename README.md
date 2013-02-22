@@ -67,6 +67,16 @@ Students should have some unix knowledge (basic commands like cd, ls, mkdir, etc
 * Select all projects -> finish
 * Pat yourself on the back, all of the projects are imported
 
+### To Install Maven 3.0
+
+* Extract the distribution archive, i.e. apache-maven-3.0.4-bin.tar.gz to the directory you wish to install Maven 3.0.4. These instructions assume you chose /usr/local/apache-maven. The subdirectory apache-maven-3.0.4 will be created from the archive.
+* In a command terminal, add the M2\_HOME environment variable, e.g. export M2\_HOME=/usr/local/apache-maven/apache-maven-3.0.4.
+* Add the M2 environment variable, e.g. export M2=$M2_HOME/bin.
+* Optional: Add the MAVEN\_OPTS environment variable to specify JVM properties, e.g. export MAVEN\_OPTS="-Xms256m -Xmx512m". This environment variable can be used to supply extra options to Maven.
+* Add M2 environment variable to your path, e.g. export PATH=$M2:$PATH.
+* Make sure that JAVA\_HOME is set to the location of your JDK, e.g. export JAVA\_HOME=/usr/java/jdk1.5.0\_02 and that $JAVA\_HOME/bin is in your PATH environment variable.
+* Run mvn --version to verify that it is correctly installed.
+
 Sample Data
 -------
 Sample data is provided in the /data directory.
