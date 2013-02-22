@@ -3,6 +3,8 @@ package com.ryantabora.tutorial;
 import java.io.Closeable;
 import java.io.IOException;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -45,8 +47,10 @@ public class StocksHBaseLoaderMapper extends
           + schema[2])) {
         // We create the HTable by the configuration created in the main driver
         // class.
-        hbaseTable = new HTable(context.getConfiguration(),
-            Bytes.toBytes(TutorialConstants.HBASE_STOCKS_TABLE));
+        Configuration conf = HBaseConfiguration.create();
+        hbaseTable = new HTable(conf, Bytes.toBytes("STOCKS"));
+        // hbaseTable = new HTable(context.getConfiguration(),
+        // Bytes.toBytes(TutorialConstants.HBASE_STOCKS_TABLE));
         // As long as we understand the format of the CSV, lets add it to HBase.
         if (schema != null) {
           // We create our put object for the rowkey
