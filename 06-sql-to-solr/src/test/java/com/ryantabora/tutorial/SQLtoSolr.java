@@ -464,6 +464,12 @@ public class SQLtoSolr {
   }
   
   @Test
+  public void testStockDateRange() throws Exception {
+    double r = sqlStockDateRange(con);
+    System.out.println(""+r);
+  }
+  
+  @Test
   public void testAverage() throws Exception {
     System.out.println("***********Starting Average Test***********");
     Assert.assertEquals(sqlAverage(con), solrAverage());
@@ -653,8 +659,19 @@ public class SQLtoSolr {
   private static ArrayList<HashMap<String,String>> sqlStockPriceRange(
       Connection con) throws Exception {
     String query = "SELECT * FROM stocks "
-        + "WHERE stock_symbol = 'QTM' AND (stock_price_open <= 2.64 AND stock_price_open >= 2.38)";
+        + "WHERE stock_symbol = 'QRR' AND (stock_price_open <= 2.64 AND stock_price_open >= 2.38)";
     return createDocs(querySql(query));
+  }
+  
+  private static Double sqlStockDateRange(
+      Connection con) throws Exception {
+    String query = "SELECT AVG(stock_price_open) AS stock_price_open_avg FROM stocks "
+        + "WHERE stock_symbol = 'QRR' AND "+
+        "(ddate <= '2007-03-06' AND ddate >= '2007-02-27') ";
+    ResultSet rs = querySql(query);
+    rs.next();
+    Object o = rs.getObject(1);
+    return (Double)o;
   }
   
   @Test
