@@ -310,8 +310,30 @@ public class SQLtoSolr {
     System.out.println("***********End Count Test***********");
   }
   
+  @Test
+  public void testCount2() throws Exception {
+    Integer count = sqlCount2(con);
+    System.out.println("count: "+count);
+  }
+    
   private static Integer sqlCount(Connection con) throws Exception {
     String query = "SELECT COUNT(*) FROM stocks WHERE stock_symbol = 'QRR'";
+    ResultSet rs = querySql(query);
+    rs.next();
+    System.out.println("===========================");
+    System.out.println("Start SQL Results");
+    System.out.println("===========================");
+    System.out.println("QRR Count : " + String.valueOf(rs.getInt(1)));
+    System.out.println("===========================");
+    System.out.println("End SQL Results");
+    System.out.println("===========================");
+    return rs.getInt(1);
+  }
+  
+  private static Integer sqlCount2(Connection con) throws Exception {
+    String query = "SELECT COUNT(*) FROM stocks "+
+    "WHERE stock_symbol = 'QRR' AND "+
+    "(ddate <= '2007-03-06' AND ddate >= '2007-02-27')";
     ResultSet rs = querySql(query);
     rs.next();
     System.out.println("===========================");
