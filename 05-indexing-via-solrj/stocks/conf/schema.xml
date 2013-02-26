@@ -2,9 +2,12 @@
 <schema name="stocks" version="1.5">
  <types>
   <fieldType name="string" class="solr.StrField"/>
-  <fieldType name="long" class="solr.LongField"/>
-  <fieldType name="float" class="solr.SortableFloatField"/>  
-  <fieldType name="date" class="solr.DateField"/>
+  <fieldType name="int" class="solr.TrieIntField"/>
+  <fieldType name="float" class="solr.TrieFloatField"/>
+  <fieldType name="long" class="solr.TrieLongField"/>
+  <fieldType name="double" class="solr.TrieDoubleField"/>
+  <fieldType name="date" class="solr.TrieDateField"/>
+  <fieldType name="boolean" class="solr.BoolField"/>
   <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100">
     <analyzer type="index">
       <tokenizer class="solr.StandardTokenizerFactory"/>
