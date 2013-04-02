@@ -11,32 +11,21 @@ The interesting part about this demo is that we are indexing data in a streaming
 Prerequisites
 -------
 * An Environment with Solr Installed (The instructor should provide a cluster on EC2)
-* An Environment with HBase Installed (The instructor should provide a cluster on EC2)
 
 Running the Exercise
 -------
 
 The exercise contains two main projects, the stocks-indexer project and the query-app project. 
 
-The stocks-indexer project actually contains two MapReduce applications, the first named HBaseStocksLoader and the second named StocksIndexer. We run the HBaseStocksLoader to stage the data and then run the StocksIndexer to index the data in Solr.
-
 The query-app is a simple HTML/AJAX web application named realtimedemo.html that queries Solr on a given interval. 
 
 Therefore, we must run the applications in this order:
-1) Run HBaseStocksLoader to stage the data
-2) Run StocksIndexer to load data in Solr
-3) As StocksIndexer is running, use realtimedemo.html to query Solr and view the newly indexed data in real time
 
-### Sorting the Stock Data (and why we are using HBase)
-If you take a look at the sample data ($PROJECT\_HOME/data) you will find the stock data in CSV format sorted by latest date. If we were to write a Java application that took this data in line by line, we would get the latest date first and then fill in the history (which is not what we want).
+1) Run StocksIndexerMain to load data in Solr
+2) As StocksIndexer is running, use realtimedemo.html to query Solr and view the newly indexed data in real time
 
-I resolved this issue in a bit of a roundabout way. Since the Think Big Academy already has an HBase course using this same stock data, I reused one of that code to sort the data in HBase. HBase provides lexicographically sorted rowkeys, so with the rowkey STOCK_SYMBOL|DATE, we get stock data ordered in the way we want it. This probably is not the best reason for incorporating HBase into our architecture, but it did make developing this course much easier for me. And hey, you get two free HBase MapReduce examples out of it!
-
-### StocksHBaseLoader Purpose
-As mentioned in the previous section we need to load HBase to sort the data. This is a MapReduce application that does just that. It scans over CSV records in HDFS and loads them into HBase. 
-
-### StocksIndexer Purpose
-This application uses MapReduce to scan over records in HBase and index them in Solr in a time-series fashion. This way, if we're querying the data in Solr, we will see 'new' records being populated in real time.
+### StocksIndexerMain Purpose
+This application adds the stocks data into DSE Solr and indexes them in Solr in a time-series fashion. This way, if we're querying the data in Solr, we will see 'new' records being populated in real time.
 
 ### Building the stocks-indexer jar
 
@@ -116,21 +105,6 @@ The real-time-stocks-indexer-1.0-SNAPSHOT.jar is already provided in the directo
 	[INFO] Final Memory: 17M/81M
 	[INFO] ------------------------------------------------------------------------
 
-### Staging the Data in HBase
-
-To stage the data in HBase, we must run the StocksHBaseLoader. We can do this with the jar we just built. We must provide the StocksHBaseLoader with a properties file, an input path to the CSV files in HDFS, and an output directory in HDFS for the job. For example:
-
-	hadoop jar ./target/real-time-stocks-indexer-1.0-SNAPSHOT.jar com.ryantabora.tutorial.StocksHBaseLoader ../tutorial.properties /tinydata /mytestoutput
-
-This job will create the STOCKS table if it does not exist, and then populate it with records it finds in the tinydata directory in HDFS. The output should look something like this:
-
-### Indexing Solr
-
-Now that the data is staged in HBase, we can index it in Solr. We will load a stock symbol at a time. The StocksIndexer requires the tutorial.properties file path as well as the stock symbol that you wish to index. For example, this call loads all of the stock data we have for AAME.
-
-	hadoop jar ./target/real-time-stocks-indexer-1.0-SNAPSHOT.jar com.ryantabora.tutorial.StocksIndexer ../tutorial.properties AAME
-
-Remember that as soon as we start loading this data in Solr we want to immediately run the web application so we can query the data as it is being indexed.
 
 ### The Query Web Application
 

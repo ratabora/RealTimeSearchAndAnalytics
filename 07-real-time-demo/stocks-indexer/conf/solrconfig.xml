@@ -1,0 +1,216 @@
+<?xml version="1.0" ?>
+<config>
+
+  <jmx />
+  <dataDir>${solr.data.dir:}</dataDir>
+  
+  <updateHandler class="solr.DirectUpdateHandler2">
+
+  </updateHandler>
+
+  <luceneMatchVersion>LUCENE_CURRENT</luceneMatchVersion>
+
+  
+  <queryResponseWriter name="xml" default="true"
+                       class="solr.XMLResponseWriter" />
+
+  <requestHandler name="standard" class="solr.StandardRequestHandler">
+  	<bool name="httpCaching">true</bool>
+  </requestHandler>
+
+  <requestHandler name="/update" class="solr.UpdateRequestHandler"  />
+
+  <searchComponent name="termscomponent" class="org.apache.solr.handler.component.TermsComponent"/>
+
+  <requestHandler name="/terms" class="org.apache.solr.handler.component.SearchHandler">
+    <arr name="components">
+      <str>termscomponent</str>
+    </arr>
+  </requestHandler>
+
+  <searchComponent name="TermVectorComponent" class="org.apache.solr.handler.component.TermVectorComponent"/>
+
+  <requestHandler name="/tvrh" class="org.apache.solr.handler.component.SearchHandler">
+    <lst name="defaults">
+
+    </lst>
+    <arr name="last-components">
+      <str>TermVectorComponent</str>
+    </arr>
+  </requestHandler>
+
+  <requestHandler name="/mlt" class="solr.MoreLikeThisHandler">
+  </requestHandler>
+
+  <searchComponent class="solr.HighlightComponent" name="highlight">
+  <highlighting>
+   <!-- Configure the standard fragmenter -->
+   <fragmenter name="gap" class="org.apache.solr.highlight.GapFragmenter" default="true">
+    <lst name="defaults">
+     <int name="hl.fragsize">100</int>
+    </lst>
+   </fragmenter>
+
+   <fragmenter name="regex" class="org.apache.solr.highlight.RegexFragmenter">
+    <lst name="defaults">
+     <int name="hl.fragsize">70</int>
+    </lst>
+   </fragmenter>
+
+   <!-- Configure the standard formatter -->
+   <formatter name="html" class="org.apache.solr.highlight.HtmlFormatter" default="true">
+    <lst name="defaults">
+     <str name="hl.simple.pre"><![CDATA[<em>]]></str>
+     <str name="hl.simple.post"><![CDATA[</em>]]></str>
+    </lst>
+   </formatter>
+
+   <!-- Configure the standard fragListBuilder -->
+   <fragListBuilder name="simple" class="org.apache.solr.highlight.SimpleFragListBuilder" default="true"/>
+
+   <!-- Configure the standard fragmentsBuilder -->
+   <fragmentsBuilder name="simple" class="org.apache.solr.highlight.SimpleFragmentsBuilder" default="true"/>
+   <fragmentsBuilder name="scoreOrder" class="org.apache.solr.highlight.ScoreOrderFragmentsBuilder"/>
+
+   <boundaryScanner name="simple" class="solr.highlight.SimpleBoundaryScanner" default="true">
+     <lst name="defaults">
+       <str name="hl.bs.maxScan">10</str>
+       <str name="hl.bs.chars">.,!? &#9;&#10;&#13;</str>
+     </lst>
+   </boundaryScanner>
+
+   <boundaryScanner name="breakIterator" class="solr.highlight.BreakIteratorBoundaryScanner">
+     <lst name="defaults">
+       <str name="hl.bs.type">WORD</str>
+       <str name="hl.bs.language">en</str>
+       <str name="hl.bs.country">US</str>
+     </lst>
+   </boundaryScanner>
+  </highlighting>
+  </searchComponent>
+
+  <!-- WFSTLookup suggest component 
+  <searchComponent class="solr.SpellCheckComponent" name="suggest_wfst">
+    <lst name="spellchecker">
+      <str name="name">suggest_wfst</str>
+      <str name="classname">org.apache.solr.spelling.suggest.Suggester</str>
+      <str name="lookupImpl">org.apache.solr.spelling.suggest.fst.WFSTLookupFactory</str>
+      <str name="storeDir">suggest_wfst</str>
+      <str name="buildOnCommit">false</str>
+
+      <bool name="exactMatchFirst">true</bool>
+
+      <str name="sourceLocation">phrasesuggest.txt</str>
+    </lst>
+
+    <str name="queryAnalyzerFieldType">phrase_suggest</str>
+  </searchComponent>-->
+
+  <!-- is this thing just configured globally or wtf is going on here?! -->
+  <queryConverter name="queryConverter" class="org.apache.solr.spelling.SuggestQueryConverter"/>
+
+  <!--  wfst (finite state automaton based) -->
+  <!-- <requestHandler class="org.apache.solr.handler.component.SearchHandler" name="/suggest_wfst">
+    <lst name="defaults">
+      <str name="spellcheck">true</str>
+      <str name="spellcheck.dictionary">suggest_wfst</str>
+      <str name="spellcheck.collate">false</str>
+      <str name="spellcheck.onlyMorePopular">true</str>
+    </lst>
+    <arr name="components">
+      <str>suggest_wfst</str>
+    </arr>
+  </requestHandler> -->
+
+  <!-- enable streaming for testing... -->
+
+  <requestDispatcher handleSelect="true" >
+    <!-- Request Parsing
+
+         These settings indicate how Solr Requests may be parsed, and
+         what restrictions may be placed on the ContentStreams from
+         those requests
+
+         enableRemoteStreaming - enables use of the stream.file
+         and stream.url parameters for specifying remote streams.
+
+         multipartUploadLimitInKB - specifies the max size of
+         Multipart File Uploads that Solr will allow in a Request.
+
+         *** WARNING ***
+         The settings below authorize Solr to fetch remote files, You
+         should make sure your system has some authentication before
+         using enableRemoteStreaming="true"
+
+      --> 
+    <requestParsers enableRemoteStreaming="true" 
+                    multipartUploadLimitInKB="2048000" />
+
+    <!-- HTTP Caching
+
+         Set HTTP caching related parameters (for proxy caches and clients).
+
+         The options below instruct Solr not to output any HTTP Caching
+         related headers
+      -->
+    <httpCaching never304="true" />
+    <!-- If you include a <cacheControl> directive, it will be used to
+         generate a Cache-Control header (as well as an Expires header
+         if the value contains "max-age=")
+
+         By default, no Cache-Control header is generated.
+
+         You can use the <cacheControl> option even if you have set
+         never304="true"
+      -->
+    <!--
+       <httpCaching never304="true" >
+         <cacheControl>max-age=30, public</cacheControl> 
+       </httpCaching>
+      -->
+    <!-- To enable Solr to respond with automatically generated HTTP
+         Caching headers, and to response to Cache Validation requests
+         correctly, set the value of never304="false"
+
+         This will cause Solr to generate Last-Modified and ETag
+         headers based on the properties of the Index.
+
+         The following options can also be specified to affect the
+         values of these headers...
+
+         lastModFrom - the default value is "openTime" which means the
+         Last-Modified value (and validation against If-Modified-Since
+         requests) will all be relative to when the current Searcher
+         was opened.  You can change it to lastModFrom="dirLastMod" if
+         you want the value to exactly correspond to when the physical
+         index was last modified.
+
+         etagSeed="..." is an option you can change to force the ETag
+         header (and validation against If-None-Match requests) to be
+         different even if the index has not changed (ie: when making
+         significant changes to your config file)
+
+         (lastModifiedFrom and etagSeed are both ignored if you use
+         the never304="true" option)
+      -->
+    <!--
+       <httpCaching lastModifiedFrom="openTime"
+                    etagSeed="Solr">
+         <cacheControl>max-age=30, public</cacheControl> 
+       </httpCaching>
+      -->
+  </requestDispatcher>
+
+  <!-- <requestDispatcher handleSelect="true" >
+    <requestParsers enableRemoteStreaming="true" multipartUploadLimitInKB="2048" />
+    <httpCaching lastModifiedFrom="openTime" etagSeed="Solr" never304="false">
+      <cacheControl>max-age=30, public</cacheControl>
+    </httpCaching>
+  </requestDispatcher>-->
+
+  <admin>
+    <defaultQuery>apple</defaultQuery>
+    <gettableFiles>solrconfig.xml schema.xml admin-extra.html</gettableFiles>
+  </admin>
+
+</config>

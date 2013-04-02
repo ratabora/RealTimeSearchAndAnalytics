@@ -2,13 +2,6 @@ package com.ryantabora.tutorial;
 
 public class TutorialConstants {
   
-  /**
-   * HBase Specific
-   */
-  public static final String HBASE_STOCKS_TABLE = "STOCKS";
-  public static final String HBASE_RECORDS_FAMILY = "RECORDS";
-  public static final String[] HBASE_STOCKS_FAMILIES = {HBASE_RECORDS_FAMILY};
-  public static final String HBASE_ROW_KEY = "rowkey";
   public static final String KEY_DELIMITER = "|";
   
   /**

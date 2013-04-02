@@ -16,7 +16,7 @@
 		function getRandomData() {
 			var countAdded = 0;
 			var isFirstDoc = true;
-			$.get('http://localhost:8983/solr/stocks/select?q=(stock_symbol:' + $("#stockSymbol").val() +')&sort=date%20desc&rows=300&wt=json&indent=true', function(data) {
+			$.get('http://127.0.0.1:8983/solr/demo.stocks/select?q=(stock_symbol:' + $("#stockSymbol").val() +')&sort=date%20desc&rows=300&wt=json&indent=true', function(data) {
 				$.each(data['response'],function(){
 					$.each(this, function(k,v){
 						var dayandtime = v['date'].split("T");
@@ -93,7 +93,7 @@
 <body>
 	<h1>Real Time Stock Data Demo</h1>
 	<div id="placeholder" style="width:900px;height:400px;"></div>
-	<p>Enter Stock Symbol: <input id="stockSymbol" type="text" value="AAME" style="text-align: right; width:5em"> </p>
+	<p>Enter Stock Symbol: <input id="stockSymbol" type="text" value="QTM" style="text-align: right; width:5em"> </p>
 	<!-- <p>Query Solr Every: <input id="updateInterval" type="text" value="" style="text-align: right; width:5em"> milliseconds</p> -->
 </body>
 </html>
